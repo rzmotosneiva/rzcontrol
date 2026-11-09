@@ -1,0 +1,2392 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RZ Rentas Control</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap">
+<style>
+html,body{margin:0; padding:0; background:var(--bg,#FAF6EC);}
+#app{display:none;}
+.login-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;}
+.login-card{width:100%; max-width:360px; background:var(--surface,#fff); border:1px solid var(--border,#E7DAB8); border-radius:16px; padding:28px 24px; box-sizing:border-box;}
+.login-card .mark{width:44px; height:44px; border-radius:12px; background:var(--accent-strong,#6E4E07); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-weight:700; font-size:18px; margin-bottom:14px;}
+.login-card h1{font-family:'Oswald',sans-serif; font-size:20px; margin:0 0 4px;}
+.login-card p{font-size:13px; color:var(--text-muted,#7A6F52); margin:0 0 18px;}
+.login-card .seg{display:flex; gap:8px; margin-bottom:14px;}
+.login-card .seg button{flex:1; padding:9px; border-radius:9px; border:1px solid var(--border,#E7DAB8); background:var(--surface-2,#F3E6C7); font-size:13px; cursor:pointer;}
+.login-card .seg button.active{background:var(--accent-strong,#6E4E07); color:#fff; border-color:var(--accent-strong,#6E4E07);}
+.login-card input{width:100%; box-sizing:border-box; padding:11px 12px; border-radius:9px; border:1px solid var(--border,#E7DAB8); font-size:14px; margin-bottom:12px; background:var(--surface,#fff); color:var(--text,#221C10);}
+.login-card button.submit{width:100%; padding:12px; border-radius:10px; border:none; background:var(--accent-strong,#6E4E07); color:#fff; font-size:14px; font-weight:600; cursor:pointer;}
+.login-card .err{color:var(--danger,#B3261E); font-size:12.5px; margin:-4px 0 12px; min-height:16px;}
+#claveBtn{background:none; border:none; color:var(--text-muted,#7A6F52); cursor:pointer; padding:6px; flex:none;}
+#logoutBtn{background:none; border:none; color:var(--text-muted,#7A6F52); cursor:pointer; padding:6px; flex:none;}
+:root{
+  --bg:#FAF6EC; --surface:#FFFFFF; --surface-2:#F3E6C7; --border:#E7DAB8;
+  --text:#221C10; --text-muted:#7A6F52;
+  --accent:#9C6F0A; --accent-strong:#6E4E07; --accent-contrast:#FFFFFF; --accent-soft:#F7EBCB;
+  --success:#1F7A43; --success-bg:#E4F3E9;
+  --warning:#8A5A00; --warning-bg:#FBF0D9;
+  --danger:#B3261E; --danger-bg:#FBE7E5;
+  --radius:14px;
+  color-scheme:light;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131107; --surface:#1D190F; --surface-2:#2B2412; --border:#3C331A;
+    --text:#F3EEDD; --text-muted:#B3A688;
+    --accent:#E5B93C; --accent-strong:#F2CB66; --accent-contrast:#171205; --accent-soft:#332912;
+    --success:#5FCB84; --success-bg:#173321;
+    --warning:#E5B93C; --warning-bg:#33290C;
+    --danger:#FF8A80; --danger-bg:#3A1815;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131107; --surface:#1D190F; --surface-2:#2B2412; --border:#3C331A;
+  --text:#F3EEDD; --text-muted:#B3A688;
+  --accent:#E5B93C; --accent-strong:#F2CB66; --accent-contrast:#171205; --accent-soft:#332912;
+  --success:#5FCB84; --success-bg:#173321;
+  --warning:#E5B93C; --warning-bg:#33290C;
+  --danger:#FF8A80; --danger-bg:#3A1815;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+body{background:var(--bg); color:var(--text); font-family:'Work Sans',system-ui,sans-serif; padding-inline:0;}
+h1,h2,h3{font-family:'Oswald',system-ui,sans-serif; text-transform:uppercase; letter-spacing:.02em; text-wrap:balance; margin:0;}
+button{font-family:inherit;}
+#app{display:flex; flex-direction:column; min-height:100%;}
+
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px; background:var(--surface); border-bottom:1px solid var(--border);
+}
+.mark{
+  width:34px; height:34px; border-radius:9px; flex:none;
+  background:linear-gradient(155deg,#1A1508,#000);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:14px; color:var(--accent-strong);
+  border:1px solid var(--border);
+}
+.brand-text{display:flex; flex-direction:column; line-height:1.1;}
+.brand-text b{font-family:'Oswald',sans-serif; font-size:15px; letter-spacing:.03em;}
+.brand-text span{font-size:11px; color:var(--text-muted);}
+.topbar .month{margin-left:auto; font-size:12px; color:var(--text-muted); text-align:right;}
+
+main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; width:100%;}
+
+.tabbar{
+  position:sticky; bottom:0; z-index:20;
+  display:grid; grid-template-columns:repeat(5,1fr);
+  background:var(--surface); border-top:1px solid var(--border);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tabbar button{
+  background:none; border:none; padding:9px 2px 8px; display:flex; flex-direction:column; align-items:center; gap:3px;
+  color:var(--text-muted); font-size:10.5px; cursor:pointer;
+}
+.tabbar button svg{width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8;}
+.tabbar button.active{color:var(--accent-strong);}
+.tabbar button.active svg{stroke:var(--accent-strong);}
+
+.section-title{font-size:13px; color:var(--text-muted); margin:22px 0 10px; display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.section-title:first-child{margin-top:0;}
+
+.cards-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px;}
+.card.wide{grid-column:1/-1;}
+.card .label{font-size:11.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em;}
+.card .value{font-family:'Oswald',sans-serif; font-size:24px; margin-top:4px;}
+.card .value.pos{color:var(--success);}
+.card .value.neg{color:var(--danger);}
+.card .sub{font-size:11.5px; color:var(--text-muted); margin-top:2px;}
+
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px;}
+.pill.ok{background:var(--success-bg); color:var(--success);}
+.pill.warn{background:var(--warning-bg); color:var(--warning);}
+.pill.bad{background:var(--danger-bg); color:var(--danger);}
+.pill.muted{background:var(--surface-2); color:var(--text-muted);}
+
+.list{display:flex; flex-direction:column; gap:8px;}
+.row-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; display:flex; align-items:center; gap:12px;}
+.row-card .main{flex:1; min-width:0;}
+.row-card .title{font-weight:600; font-size:14.5px;}
+.row-card .meta{font-size:12px; color:var(--text-muted); margin-top:2px;}
+.row-card .amount{font-family:'Oswald',sans-serif; font-size:16px; white-space:nowrap;}
+.row-card .amount.pos{color:var(--success);}
+.row-card .amount.neg{color:var(--danger);}
+.row-card button.del{background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; flex:none;}
+.row-card.tap{cursor:pointer;}
+.row-card .meta2{font-size:12px; color:var(--text-muted); margin-top:2px;}
+
+.stat-list{display:flex; flex-direction:column; gap:10px; margin-bottom:16px;}
+.stat-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px; background:var(--surface-2); border-radius:10px;}
+.stat-row .k{font-size:12.5px; color:var(--text-muted);}
+.stat-row .v{font-family:'Oswald',sans-serif; font-size:16px;}
+.stat-row .v.pos{color:var(--success);} .stat-row .v.neg{color:var(--danger);}
+.stat-row.total{background:var(--accent-soft); border:1px solid var(--border);}
+
+.row-card button.flag{background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; flex:none;}
+.row-card button.flag.on{color:var(--danger);}
+.owner-only-note{font-size:11.5px; color:var(--text-muted); margin-top:-2px; margin-bottom:14px;}
+
+.wa-btn{color:#25D366; padding:4px; flex:none; display:inline-flex; align-items:center; text-decoration:none;}
+.wa-top{margin-left:8px; background:#25D366; color:#fff; border-radius:10px; padding:7px;}
+
+.month-nav{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px;}
+.month-nav button{background:var(--surface-2); border:none; color:var(--text); width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none;}
+.month-nav button:disabled{opacity:.35; cursor:default;}
+.month-nav .label{font-family:'Oswald',sans-serif; font-size:14px; text-transform:capitalize; letter-spacing:.02em;}
+
+.moto-balance-row{display:flex; align-items:center; gap:10px; padding:11px 13px; background:var(--surface); border:1px solid var(--border); border-radius:10px; cursor:pointer;}
+.moto-balance-row .main{flex:1; min-width:0;}
+.moto-balance-row .title{font-weight:600; font-size:13.5px;}
+.moto-balance-row .meta{font-size:11.5px; color:var(--text-muted); margin-top:1px;}
+.moto-balance-row .amount{font-family:'Oswald',sans-serif; font-size:15px; white-space:nowrap;}
+
+.cal-head-row, .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+.cal-head-row{margin-bottom:4px;}
+.cal-head-row div{font-size:10px; text-align:center; color:var(--text-muted); text-transform:uppercase;}
+.cal-grid{margin-bottom:10px;}
+.cal-day{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:12px; background:var(--surface-2); color:var(--text-muted);}
+.cal-day.blank{background:transparent;}
+.cal-day.paid{background:var(--success-bg); color:var(--success); font-weight:700;}
+.cal-day.miss{background:var(--danger-bg); color:var(--danger); font-weight:700;}
+.cal-day.clickable{cursor:pointer;}
+.cal-day.clickable:active{transform:scale(0.92);}
+.cal-day.today{box-shadow:0 0 0 2px var(--accent-strong) inset;}
+.cal-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--text-muted); margin-bottom:18px;}
+.cal-legend span{display:inline-flex; align-items:center; gap:5px;}
+.cal-dot{width:9px; height:9px; border-radius:3px; display:inline-block;}
+.cal-dot.paid{background:var(--success);} .cal-dot.miss{background:var(--danger);} .cal-dot.blank{background:var(--surface-2); border:1px solid var(--border);}
+
+.empty{padding:34px 18px; text-align:center; color:var(--text-muted); border:1px dashed var(--border); border-radius:var(--radius); font-size:13.5px;}
+.empty b{display:block; color:var(--text); font-family:'Oswald',sans-serif; font-size:15px; text-transform:none; letter-spacing:0; margin-bottom:4px;}
+
+.fab{
+  position:fixed; right:18px; bottom:calc(78px + env(safe-area-inset-bottom,0px)); z-index:25;
+  width:52px; height:52px; border-radius:16px; border:none; cursor:pointer;
+  background:var(--accent-strong); color:var(--accent-contrast);
+  display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.25);
+}
+.fab svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2;}
+
+.sheet-backdrop{position:fixed; inset:0; background:rgba(10,8,2,.45); z-index:40; display:flex; align-items:flex-end;}
+.sheet{
+  background:var(--surface); width:100%; max-width:640px; margin:0 auto; border-radius:18px 18px 0 0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px)); max-height:88vh; overflow-y:auto;
+  border-top:1px solid var(--border);
+}
+.sheet h2{font-size:17px; margin-bottom:14px;}
+.field{display:flex; flex-direction:column; gap:5px; margin-bottom:12px;}
+.field label{font-size:12px; color:var(--text-muted);}
+.field-error{font-size:12px; color:var(--danger); margin-top:2px;}
+.photo-preview{margin-top:6px; display:flex; align-items:center; gap:10px;}
+.photo-preview img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--border);}
+.photo-badge{color:var(--text-muted); flex:none; display:flex; align-items:center;}
+.field input, .field select, .field textarea{
+  background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 11px; font-size:14.5px; color:var(--text); font-family:inherit;
+}
+.field textarea{resize:vertical; min-height:56px;}
+.seg{display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+.seg button{flex:1; padding:9px; background:var(--bg); border:none; color:var(--text-muted); font-weight:600; font-size:13px; cursor:pointer;}
+.seg button.active{background:var(--accent-strong); color:var(--accent-contrast);}
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.sheet-actions{display:flex; gap:10px; margin-top:6px;}
+.btn{flex:1; padding:12px; border-radius:10px; border:none; font-weight:600; font-size:14px; cursor:pointer;}
+.btn.primary{background:var(--accent-strong); color:var(--accent-contrast);}
+.btn.ghost{background:var(--surface-2); color:var(--text);}
+
+.banner{background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius); padding:13px 14px; font-size:13px; color:var(--text); margin-bottom:16px; line-height:1.5;}
+.banner b{color:var(--accent-strong);}
+
+.moto-select-strip{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:16px;}
+.moto-select-strip button{
+  flex:none; padding:7px 13px; border-radius:99px; border:1px solid var(--border); background:var(--surface);
+  color:var(--text-muted); font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.moto-select-strip button.active{background:var(--accent-strong); color:var(--accent-contrast); border-color:var(--accent-strong);}
+
+.gps-block{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px;}
+.gps-block .h{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+.gps-block .h .title{font-weight:600; font-size:14.5px;}
+.gps-mini{display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12.5px; color:var(--text-muted);}
+.gps-mini b{color:var(--text); font-weight:600; display:block; font-size:13px;}
+
+::placeholder{color:var(--text-muted); opacity:.7;}
+
+.toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(90px + env(safe-area-inset-bottom,0px)); z-index:60; max-width:min(92vw,520px); background:var(--text); color:var(--bg); padding:11px 15px; border-radius:11px; font-size:13px; line-height:1.45; box-shadow:0 8px 20px rgba(0,0,0,.25);}
+.toast.err{background:var(--danger); color:#fff;}
+.desglose{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-top:10px;}
+.desglose summary{cursor:pointer; padding:12px 14px; font-weight:600; font-size:13.5px; list-style:none; display:flex; justify-content:space-between; gap:10px; align-items:center;}
+.desglose summary::-webkit-details-marker{display:none;}
+.desglose summary .chev{color:var(--text-muted); font-size:12px; font-weight:500;}
+.desglose[open] summary{border-bottom:1px solid var(--border);}
+.desglose .body{padding:10px 14px 14px;}
+.dg-row{display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px dashed var(--border); font-size:12.5px;}
+.dg-row:last-child{border-bottom:none;}
+.dg-row .main{flex:1; min-width:0;}
+.dg-row .t{font-weight:600; font-size:13px;}
+.dg-row .m{color:var(--text-muted); margin-top:1px;}
+.dg-row .amt{font-family:'Oswald',sans-serif; font-size:14.5px; white-space:nowrap;}
+.dg-row .amt.pos{color:var(--success);} .dg-row .amt.neg{color:var(--danger);}
+.dg-src{display:inline-block; font-size:10.5px; font-weight:600; padding:1px 7px; border-radius:99px; background:var(--surface-2); color:var(--text-muted); margin-left:4px;}
+.dg-total{display:flex; justify-content:space-between; padding-top:10px; margin-top:4px; border-top:1px solid var(--border); font-weight:600;}
+.warn-box{background:var(--warning-bg); color:var(--warning); border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.5; margin-bottom:10px;}
+.warn-box b{display:block; margin-bottom:2px;}
+.hint{font-size:12px; color:var(--warning); background:var(--warning-bg); border-radius:8px; padding:7px 9px; margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <form class="login-card" id="loginForm">
+    <div class="mark">RZ</div>
+    <h1>RZ Rentas Control</h1>
+    <p>Ingresa el código de tu negocio y tu clave de acceso.</p>
+    <div class="field"><label>Código del negocio</label><input id="loginNegocio" placeholder="p. ej. rzrentas" autocapitalize="off" autocomplete="off"></div>
+    <div class="seg" id="loginRolSeg">
+      <button type="button" class="active" data-v="dueno">Dueño</button>
+      <button type="button" data-v="equipo">Encargado</button>
+    </div>
+    <div class="field"><label>Clave de acceso</label><input id="loginClave" type="password" autocomplete="off"></div>
+    <div class="err" id="loginError"></div>
+    <button type="submit" class="submit" id="loginSubmit">Entrar</button>
+  </form>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="mark">RZ</div>
+    <div class="brand-text"><b>RZ RENTAS</b><span>Control del negocio</span></div>
+    <div class="month" id="topMonth"></div>
+    <button id="claveBtn" class="hdr-btn" aria-label="Cambiar clave del dueño" title="Cambiar clave" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m16 7 3 3"/><path d="m18 5 2 2"/></svg></button>
+    <button id="logoutBtn" aria-label="Cerrar sesión" title="Cerrar sesión"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
+    <a class="wa-btn wa-top" id="topWaBtn" href="#" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp" title="Escribir por WhatsApp">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.05L2 22l5.1-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm5.2 14.3c-.22.62-1.28 1.19-1.77 1.24-.45.05-.94.24-3.17-.66-2.68-1.08-4.42-3.8-4.56-3.98-.13-.18-1.09-1.45-1.09-2.76 0-1.32.69-1.96.94-2.23.24-.26.53-.32.7-.32h.5c.17 0 .38-.03.6.45.22.5.73 1.72.8 1.84.06.13.1.28.02.45-.09.17-.13.28-.26.43-.13.15-.27.34-.39.46-.13.13-.26.27-.11.53.15.26.67 1.09 1.43 1.76.98.86 1.8 1.13 2.06 1.26.26.13.41.11.56-.07.15-.17.65-.75.82-1.01.17-.26.35-.22.58-.13.24.09 1.5.7 1.75.83.26.13.43.19.5.3.06.11.06.63-.16 1.24Z"/></svg>
+    </a>
+  </header>
+  <main id="view"></main>
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="resumen" class="active">
+      <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-4H4v4Z"/></svg>
+      Resumen
+    </button>
+    <button data-tab="finanzas">
+      <svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M14 7h6v6"/></svg>
+      Finanzas
+    </button>
+    <button data-tab="motos">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-8h5l3 5h3M9 9h4"/></svg>
+      Motos
+    </button>
+    <button data-tab="mantenimiento">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 1 5.4-5.4L21 6l-3-3-3.3 3.3Z"/></svg>
+      Mant.
+    </button>
+    <button data-tab="gps">
+      <svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+      GPS
+    </button>
+  </nav>
+</div>
+<template id="tplSupervisionTab">
+  <button data-tab="supervision">
+    <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.6 3.4 8.4 8 9 4.6-.6 8-4.4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+    Supervisión
+  </button>
+</template>
+
+<!-- SDK de Firebase (versión "compat", con la misma forma de db.collection()/db.doc()
+     que ya usa toda la app de abajo, para no tener que reescribir la lógica). -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  // ⚠️ PEGA AQUÍ los datos de tu proyecto de Firebase (Configuración del proyecto
+  // → General → "Tus apps" → app web → "Configuración del SDK"). Son públicos por
+  // diseño (no son una contraseña secreta) — lo que de verdad protege tus datos son
+  // las Reglas de seguridad de Firestore que configuras aparte en la consola.
+  var firebaseConfig = {
+    apiKey: "AIzaSyAl2VibGao2BNTcwQS71YmW7MV2deTkmvk",
+    authDomain: "rz-rentas-neiva.firebaseapp.com",
+    databaseURL: "https://rz-rentas-neiva-default-rtdb.firebaseio.com",
+    projectId: "rz-rentas-neiva",
+    storageBucket: "rz-rentas-neiva.firebasestorage.app",
+    messagingSenderId: "339610706681",
+    appId: "1:339610706681:web:3e128c9968631f1d137828"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  var db = null;
+  var isOwnerView = false;
+  // negocioId identifica a QUÉ NEGOCIO pertenecen los datos que se leen/escriben.
+  // Se obtiene del correo con el que se inició sesión (ver checkNegocioLogin más
+  // abajo): "rzrentas.dueno@rzcontrol.app" y "rzrentas.equipo@rzcontrol.app" son
+  // las dos cuentas de UN mismo negocio llamado "rzrentas". Si vendes esta app a
+  // otro dueño de motos, le creas sus propias cuentas con OTRO negocioId (p.ej.
+  // "motosjp.dueno@..." / "motosjp.equipo@...") y sus datos quedan
+  // completamente separados de los tuyos, aislados también por las reglas de
+  // seguridad de Firestore (ver el archivo de reglas que te di aparte).
+  var negocioId = null;
+  function negocioPath(collectionName){
+    return 'negocios/' + negocioId + '/' + collectionName;
+  }
+  // Avisos dentro de la página. (Los cuadros alert()/confirm() del navegador no
+  // aparecen dentro de la vista de Claude: confirm() responde "no" solo, así que
+  // el botón de reiniciar nómina nunca hacía nada allí.)
+  var toastTimer = null;
+  function showToast(msg, isError){
+    var old = document.getElementById('rzToast'); if(old) old.remove();
+    var t = document.createElement('div');
+    t.id = 'rzToast'; t.className = 'toast' + (isError ? ' err' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.remove(); }, isError ? 7000 : 3500);
+  }
+  function showSaveError(err){
+    var msg = (err && err.message) ? err.message : String(err);
+    showToast('No se pudo guardar: ' + msg, true);
+    console.error('Firestore write error:', err);
+  }
+  // Confirmación dentro de la página (reemplaza confirm()).
+  function askConfirm(title, messageHtml, yesLabel, onYes, onNo){
+    openSheet(
+      '<h2>'+escapeHtml(title)+'</h2>'
+      + '<div style="font-size:13.5px; line-height:1.55; margin-bottom:14px;">'+messageHtml+'</div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cfNo">Cancelar</button><button class="btn primary" id="cfYes">'+escapeHtml(yesLabel||'Sí, continuar')+'</button></div>',
+      function(sheet){
+        sheet.querySelector('#cfNo').addEventListener('click', function(){ closeSheet(); if(onNo) onNo(); });
+        sheet.querySelector('#cfYes').addEventListener('click', function(){ closeSheet(); onYes(); });
+      }
+    );
+  }
+  // De cada pago de renta diaria, este monto fijo se separa automáticamente
+  // para nómina/administración y NO se cuenta en la suma general de ingresos.
+  // Si este valor cambia, solo hay que editar el número de aquí.
+  var ADMIN_DIARIO = 5000;
+  // Depósito reembolsable: de cada pago diario se aparta este monto para
+  // devolvérselo al arrendatario al terminar la renta. No es ingreso del negocio
+  // mientras esté en custodia; solo lo que se retenga al liquidar entra como ingreso.
+  var DEPOSITO_DIARIO = 5000;
+  var state = { motos: [], movimientos: [], mantenimientos: [], alertas: [], supervision: [], tab: 'resumen', motoFilter: 'todas', viewMonth: null, nominaConfig: { ultimoReinicio: 0 }, recurrentes: [] };
+  var unsubs = [];
+
+  // Registra el pago de un día de renta dividiéndolo automáticamente:
+  // (tarifa - ADMIN_DIARIO) va como ingreso normal "Renta" (suma general),
+  // y ADMIN_DIARIO va como tipo "nomina" (no se cuenta en la suma general,
+  // se acumula aparte para pagos de nómina/administración).
+  function registrarPagoRenta(moto, fecha, notaExtra, onDone, yaConfirmado){
+    var total = Number(moto.tarifaDiaria) || 0;
+    if(total<=0){
+      showToast('La moto '+moto.placa+' no tiene tarifa diaria. Edítala y escribe la tarifa antes de registrar la renta.', true);
+      return;
+    }
+    // Evita registrar dos veces la renta del mismo día (doble toque o dos personas).
+    var yaExiste = state.movimientos.some(function(mv){
+      return mv.motoId===moto.id && mv.tipo==='ingreso' && mv.categoria==='Renta' && mv.fecha===fecha;
+    });
+    if(yaExiste && !yaConfirmado){
+      askConfirm('Renta ya registrada',
+        'La moto <b>'+escapeHtml(moto.placa)+'</b> ya tiene una renta registrada el '+fmtDate(fecha)+'. ¿Registrar otra para el mismo día?',
+        'Registrar otra', function(){ registrarPagoRenta(moto, fecha, notaExtra, onDone, true); });
+      return;
+    }
+    // Las motos de otros propietarios no aportan a la nómina de RZ.
+    var admin = cuentaDeMoto(moto) ? 0 : Math.min(ADMIN_DIARIO, total);
+    var deposito = Math.min(DEPOSITO_DIARIO, total - admin);
+    var general = total - admin - deposito;
+    var base = { motoId: moto.id, motoPlaca: moto.placa, fecha: fecha, createdAt: Date.now(), cuenta: cuentaDeMoto(moto) };
+    var batch = db.batch();
+    var refGeneral = db.collection(negocioPath('movimientos')).doc();
+    batch.set(refGeneral, Object.assign({}, base, { tipo: 'ingreso', monto: general, categoria: 'Renta', nota: notaExtra || '' }));
+    if(admin > 0){
+      var refAdmin = db.collection(negocioPath('movimientos')).doc();
+      batch.set(refAdmin, Object.assign({}, base, { tipo: 'nomina', monto: admin, categoria: 'Administración', nota: 'Separado automático de la renta diaria' }));
+    }
+    if(deposito > 0){
+      var refDep = db.collection(negocioPath('movimientos')).doc();
+      batch.set(refDep, Object.assign({}, base, { tipo: 'deposito', monto: deposito, categoria: 'Depósito reembolsable', nota: 'Separado automático de la renta diaria' }));
+    }
+    batch.commit().then(onDone).catch(showSaveError);
+  }
+  // ---------- CUENTAS SEPARADAS (motos de otros propietarios) ----------
+  // Cada moto tiene un "propietario". Vacío = RZ Rentas. Cualquier otro nombre
+  // (p. ej. "Administrador") es una cuenta aparte: su plata y sus gastos NO
+  // entran en los totales de RZ; se ven en su propia cuenta en Finanzas.
+  function cuentaDeMoto(m){ return (m && m.propietario) ? String(m.propietario) : ''; }
+  function cuentaDeMotoId(id){ return id ? cuentaDeMoto(motoById(id)) : ''; }
+  // Si la moto existe, manda su propietario. Si la moto se eliminó, se usa la
+  // cuenta que quedó grabada en el registro, para que su historia no cambie de cuenta.
+  function cuentaDeMov(mv){
+    if(mv.motoId){ var m = motoById(mv.motoId); return m ? cuentaDeMoto(m) : (mv.cuenta || ''); }
+    return mv.cuenta || '';
+  }
+  function cuentaDeMant(mt){ var m = motoById(mt.motoId); return m ? cuentaDeMoto(m) : (mt.cuenta || ''); }
+  function nombreCuenta(c){ return c ? c : 'RZ Rentas'; }
+  function motoTieneRegistros(id){
+    return state.movimientos.some(function(mv){ return mv.motoId===id; }) || state.mantenimientos.some(function(mt){ return mt.motoId===id; });
+  }
+  // Opciones de moto agrupadas por cuenta. Con "soloCuenta" (texto) solo salen
+  // las motos de esa cuenta, para que sea imposible elegir una de la otra.
+  function motoOptionsHtml(selectedId, soloCuenta){
+    var cuentas = [''].concat(cuentasTerceros());
+    if(typeof soloCuenta==='string') cuentas = [soloCuenta];
+    var hayTerceros = cuentasTerceros().length>0;
+    return cuentas.map(function(c){
+      var grupo = state.motos.filter(function(m){ return cuentaDeMoto(m)===c; });
+      if(!grupo.length) return '';
+      var opts = grupo.map(function(m){ return '<option value="'+m.id+'"'+(selectedId===m.id?' selected':'')+'>'+escapeHtml(motoLabel(m))+'</option>'; }).join('');
+      return hayTerceros ? '<optgroup label="'+escapeHtml(c?('Motos de '+c+' (cuenta aparte)'):'Motos de RZ Rentas')+'">'+opts+'</optgroup>' : opts;
+    }).join('');
+  }
+  function cuentaBanner(c){
+    if(!cuentasTerceros().length) return '';
+    return '<div class="banner" style="margin-bottom:12px;">Se registra en la cuenta de <b>'+escapeHtml(nombreCuenta(c))+'</b>.</div>';
+  }
+
+  function cuentasTerceros(){
+    var set = {};
+    state.motos.forEach(function(m){ var c = cuentaDeMoto(m); if(c) set[c] = true; });
+    state.movimientos.forEach(function(mv){ if(!mv.motoId && mv.cuenta) set[mv.cuenta] = true; });
+    return Object.keys(set).sort();
+  }
+
+  // ---------- DEPÓSITO REEMBOLSABLE POR MOTO ----------
+  // Se suma lo apartado en cada día pagado desde la última liquidación de esa
+  // moto (moto.depositoCorte). Al pasar la moto a "Disponible" se liquida:
+  // se devuelve lo que corresponda y el acumulado vuelve a $0.
+  function depositoMoto(motoId){
+    var m = motoById(motoId) || {};
+    var corte = Number(m.depositoCorte||0);
+    var docs = state.movimientos.filter(function(mv){ return mv.motoId===motoId && mv.tipo==='deposito' && Number(mv.createdAt||0) > corte; });
+    var total = docs.reduce(function(a,mv){ return a+Number(mv.monto||0); },0);
+    var dias = {};
+    docs.forEach(function(mv){ if(mv.categoria==='Depósito reembolsable') dias[mv.fecha]=true; });
+    return { total:total, dias:Object.keys(dias).length, docs:docs };
+  }
+  function depositosEnCustodia(cuenta){
+    cuenta = cuenta || '';
+    return state.motos.filter(function(m){ return cuentaDeMoto(m)===cuenta; })
+      .reduce(function(a,m){ return a + depositoMoto(m.id).total; },0);
+  }
+  // Días pagados de la renta actual que se registraron antes de existir el
+  // depósito (no tienen su parte apartada). Se pueden pasar al depósito a mano.
+  function diasSinDeposito(m){
+    if(m.estado!=='rentada' || !m.fechaInicioRenta) return [];
+    var corte = Number(m.depositoCorte||0);
+    return state.movimientos.filter(function(mv){
+      if(mv.motoId!==m.id || mv.tipo!=='ingreso' || mv.categoria!=='Renta') return false;
+      if(mv.fecha < m.fechaInicioRenta || Number(mv.createdAt||0) <= corte) return false;
+      return !state.movimientos.some(function(d){ return d.tipo==='deposito' && d.motoId===m.id && d.createdAt===mv.createdAt; });
+    });
+  }
+  function liquidacionesMoto(motoId){
+    return state.movimientos.filter(function(mv){ return mv.motoId===motoId && mv.tipo==='deposito_liq'; })
+      .sort(function(a,b){ return Number(b.createdAt||0)-Number(a.createdAt||0); });
+  }
+
+  // Total de nómina/administración acumulado desde el último reinicio (último pago de nómina hecho).
+  function nominaAcumulada(){
+    var desde = (state.nominaConfig && state.nominaConfig.ultimoReinicio) || 0;
+    return state.movimientos.filter(function(m){ return m.tipo==='nomina' && Number(m.createdAt||0) > desde; })
+      .reduce(function(a,m){ return a + Number(m.monto||0); }, 0);
+  }
+  // ---------- GASTOS FIJOS MENSUALES (seguro todo riesgo, etc.) ----------
+  // La lista se guarda en config/recurrentes (un solo documento), y cada vez que
+  // se paga un mes se crea un gasto normal en Finanzas marcado con
+  // recurrenteId + recurrenteMes. Así se sabe qué está pagado en cada mes y el
+  // gasto entra al saldo como cualquier otro.
+  function subscribeRecurrentes(){
+    var un = db.doc(negocioPath('config')+'/recurrentes').onSnapshot(function(doc){
+      state.recurrentes = (doc.exists && Array.isArray(doc.data().items)) ? doc.data().items : [];
+      render();
+    }, function(err){ console.error('config/recurrentes', err); });
+    unsubs.push(un);
+  }
+  function saveRecurrentes(items, onDone){
+    db.doc(negocioPath('config')+'/recurrentes').set({ items: items, updatedAt: Date.now() })
+      .then(function(){ if(onDone) onDone(); }).catch(showSaveError);
+  }
+  function pagoRecurrente(rec, mk){
+    return state.movimientos.find(function(mv){ return mv.recurrenteId===rec.id && mv.recurrenteMes===mk; });
+  }
+  function fechaRecurrente(rec, mk){
+    var y = Number(mk.slice(0,4)), mo = Number(mk.slice(5,7));
+    var dia = Math.min(Number(rec.dia)||1, new Date(y, mo, 0).getDate());
+    var venc = mk+'-'+(dia<10?'0'+dia:dia);
+    var hoy = todayISO();
+    // En el mes actual se registra con la fecha de hoy si aún no llega el día de pago.
+    return { vence: venc, registrar: (mk===monthKey(hoy) && venc>hoy) ? hoy : venc };
+  }
+  function recurrentesDelMes(mk, cuenta){
+    var hoy = todayISO();
+    cuenta = cuenta || '';
+    return state.recurrentes.filter(function(r){ return r.activo!==false && (!r.desde || r.desde<=mk) && (!r.motoId || motoById(r.motoId)) && cuentaDeMotoId(r.motoId)===cuenta; }).map(function(r){
+      var f = fechaRecurrente(r, mk);
+      var pago = pagoRecurrente(r, mk);
+      var moto = r.motoId ? motoById(r.motoId) : null;
+      return { rec:r, pago:pago, vence:f.vence, fechaReg:f.registrar, moto:moto, vencido: !pago && f.vence<hoy };
+    }).sort(function(a,b){ return a.vence.localeCompare(b.vence) || ((a.moto&&a.moto.placa)||'').localeCompare((b.moto&&b.moto.placa)||''); });
+  }
+  function registrarRecurrente(rec, mk, monto, onDone){
+    if(pagoRecurrente(rec, mk)){ showToast('Ese gasto ya está registrado en este mes.'); return; }
+    var moto = rec.motoId ? motoById(rec.motoId) : null;
+    var nombreMes = new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    db.collection(negocioPath('movimientos')).add({
+      tipo:'gasto', monto: monto, categoria: rec.categoria||'Seguros (SOAT/todo riesgo)',
+      motoId: rec.motoId||null, motoPlaca: moto?moto.placa:null,
+      fecha: fechaRecurrente(rec, mk).registrar,
+      nota: rec.nombre+' — '+nombreMes, fotoUrl:null,
+      recurrenteId: rec.id, recurrenteMes: mk, createdAt: Date.now(), cuenta: cuentaDeMotoId(rec.motoId)
+    }).then(function(){ if(onDone) onDone(); }).catch(showSaveError);
+  }
+
+  function renderRecurrentes(mk, cuenta){
+    var lista = recurrentesDelMes(mk, cuenta);
+    var nombreMes = new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long'});
+    var html = '<div class="section-title"><span>Gastos fijos de '+nombreMes+'</span>'
+      + (isOwnerView ? '<button class="pill muted" id="recAdmin" style="cursor:pointer;border:none;">'+(state.recurrentes.length?'Administrar':'+ Agregar')+'</button>' : '')
+      + '</div>';
+    if(lista.length===0){
+      html += '<div class="empty" style="margin-bottom:6px;"><b>Sin gastos fijos</b>'+(isOwnerView
+        ? 'Agrega el seguro todo riesgo de cada moto una vez, y cada mes lo registras con un toque.'
+        : 'El dueño todavía no ha configurado gastos fijos.')+'</div>';
+      return html;
+    }
+    var pendientes = lista.filter(function(x){return !x.pago;});
+    var totalPend = pendientes.reduce(function(a,x){return a+Number(x.rec.monto||0);},0);
+    var totalPag = lista.filter(function(x){return x.pago;}).reduce(function(a,x){return a+Number(x.pago.monto||0);},0);
+    html += '<div class="list">' + lista.map(function(x){
+      var pill = x.pago ? '<span class="pill ok">Pagado</span>'
+        : (x.vencido ? '<span class="pill bad">Vencido</span>' : '<span class="pill warn">Vence '+Number(x.vence.slice(8))+' '+nombreMes.slice(0,3)+'</span>');
+      return '<div class="row-card"><div class="main">'
+        + '<div class="title">'+escapeHtml(x.moto?x.moto.placa:(x.rec.motoId?'Moto eliminada':'General'))+' · '+escapeHtml(x.rec.nombre)+'</div>'
+        + '<div class="meta">'+(x.pago?('Pagado '+fmtDate(x.pago.fecha)):('Se paga el día '+Number(x.rec.dia||1)))+'</div>'
+        + '<div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;"><span class="amount neg">'+fmtMoney(x.pago?x.pago.monto:x.rec.monto)+'</span>'+pill+'</div></div>'
+        + (x.pago ? '' : '<button class="btn primary" data-rec-pagar="'+x.rec.id+'" style="flex:none; padding:7px 12px; font-size:12.5px;">Registrar</button>')
+        + '</div>';
+    }).join('') + '</div>';
+    html += '<div class="stat-list" style="margin-top:10px;">'
+      + statRow('Pagado este mes', fmtMoney(totalPag), 'neg')
+      + (pendientes.length ? statRow('Pendiente ('+pendientes.length+')', fmtMoney(totalPend), '') : '')
+      + '</div>';
+    if(pendientes.length>1){
+      html += '<div class="sheet-actions" style="margin-top:-6px; margin-bottom:6px;"><button class="btn ghost" id="recPagarTodos">Registrar los '+pendientes.length+' pendientes ('+fmtMoney(totalPend)+')</button></div>';
+    }
+    return html;
+  }
+
+  function openPagarRecurrente(rec, mk){
+    var moto = rec.motoId ? motoById(rec.motoId) : null;
+    var f = fechaRecurrente(rec, mk);
+    openSheet(
+      '<h2>Registrar '+escapeHtml(rec.nombre)+'</h2>'
+      + '<div class="owner-only-note">'+escapeHtml(moto?moto.placa:'General')+' · '+new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'})+' · se guarda con fecha '+fmtDate(f.registrar)+'</div>'
+      + '<div class="field"><label for="rpMonto">Monto pagado (COP)</label><input id="rpMonto" type="text" inputmode="numeric" value="'+(Number(rec.monto)||'')+'"><div class="field-error" id="rpErr" hidden>Ingresa un monto mayor a cero.</div></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="rpSave">Registrar gasto</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        sheet.querySelector('#rpSave').addEventListener('click', function(){
+          var monto = parseMoney(sheet.querySelector('#rpMonto').value);
+          if(!monto){ sheet.querySelector('#rpErr').hidden = false; return; }
+          registrarRecurrente(rec, mk, monto, function(){ closeSheet(); showToast(rec.nombre+' registrado.'); });
+        });
+      }
+    );
+  }
+
+  function openAdminRecurrentes(){
+    if(!isOwnerView) return;
+    var cuentaAdm = state.cuenta || '';
+    var items = state.recurrentes.filter(function(r){ return cuentaDeMotoId(r.motoId)===cuentaAdm; });
+    var html = '<h2>Gastos fijos mensuales</h2>' + cuentaBanner(cuentaAdm);
+    if(items.length){
+      html += '<div class="list" style="margin-bottom:14px;">' + items.map(function(r){
+        var moto = r.motoId ? motoById(r.motoId) : null;
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(moto?moto.placa:(r.motoId?'Moto eliminada':'General'))+' · '+escapeHtml(r.nombre)+'</div>'
+          + '<div class="meta">'+fmtMoney(r.monto)+' · día '+Number(r.dia||1)+' de cada mes'+(r.activo===false?' · pausado':'')+'</div></div>'
+          + '<button class="pill muted" data-rec-edit="'+r.id+'" style="cursor:pointer;border:none;">Editar</button>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    html += '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cerrar</button><button class="btn primary" id="recNuevo">+ Nuevo gasto fijo</button></div>';
+    openSheet(html, function(sheet){
+      sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+      sheet.querySelector('#recNuevo').addEventListener('click', function(){ openRecForm(null); });
+      sheet.querySelectorAll('[data-rec-edit]').forEach(function(b){
+        b.addEventListener('click', function(){
+          var r = state.recurrentes.find(function(x){return x.id===b.getAttribute('data-rec-edit');});
+          if(r) openRecForm(r);
+        });
+      });
+    });
+  }
+
+  function openRecForm(existing){
+    var r = existing || { nombre:'Seguro todo riesgo', categoria:'Seguros (SOAT/todo riesgo)', dia:1 };
+    var cuentaAct = existing ? cuentaDeMotoId(existing.motoId) : (state.cuenta || '');
+    var motoOpts = (existing ? '' : '<option value="__todas">Todas las motos de '+escapeHtml(nombreCuenta(cuentaAct))+' (uno por cada moto)</option>')
+      + motoOptionsHtml(r.motoId, cuentaAct)
+      // Un gasto fijo sin moto solo puede ser de RZ.
+      + (cuentaAct ? '' : '<option value=""'+(existing&&!existing.motoId?' selected':'')+'>Sin moto (gasto general de RZ Rentas)</option>');
+    var cats = ['Seguros (SOAT/todo riesgo)','Mantenimiento','Administrativo','Otro gasto'];
+    openSheet(
+      '<h2>'+(existing?'Editar gasto fijo':'Nuevo gasto fijo')+'</h2>'
+      + cuentaBanner(cuentaAct)
+      + '<div class="field"><label for="rcNombre">Nombre</label><input id="rcNombre" value="'+escapeHtml(r.nombre||'')+'" placeholder="Seguro todo riesgo"></div>'
+      + '<div class="field"><label for="rcMoto">Moto</label><select id="rcMoto">'+motoOpts+'</select></div>'
+      + '<div class="two-col"><div class="field"><label for="rcMonto">Valor mensual (COP)</label><input id="rcMonto" type="text" inputmode="numeric" value="'+(r.monto||'')+'" placeholder="120000"></div>'
+      + '<div class="field"><label for="rcDia">Día de pago</label><input id="rcDia" type="number" min="1" max="31" value="'+(r.dia||1)+'"></div></div>'
+      + '<div class="field"><label for="rcCat">Categoría</label><select id="rcCat">'+cats.map(function(c){return '<option'+(r.categoria===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
+      + (existing ? '<div class="field"><label for="rcActivo">Estado</label><select id="rcActivo"><option value="1"'+(r.activo!==false?' selected':'')+'>Activo</option><option value="0"'+(r.activo===false?' selected':'')+'>Pausado (no aparece en los meses)</option></select></div>' : '')
+      + '<div class="field-error" id="rcErr" hidden></div>'
+      + '<div class="owner-only-note">Esto no descuenta nada solo. Cada mes aparece en Finanzas para que lo registres con un toque. Los meses ya registrados no cambian si editas el valor.</div>'
+      + '<div class="sheet-actions">'
+      + (existing ? '<button class="btn ghost" id="rcDel" style="color:var(--danger);">Eliminar</button>' : '<button class="btn ghost" id="cancelSheet">Cancelar</button>')
+      + '<button class="btn primary" id="rcSave">Guardar</button></div>',
+      function(sheet){
+        var c = sheet.querySelector('#cancelSheet'); if(c) c.addEventListener('click', openAdminRecurrentes);
+        var del = sheet.querySelector('#rcDel');
+        if(del) del.addEventListener('click', function(){
+          askConfirm('Eliminar gasto fijo', 'Deja de aparecer en los próximos meses. Los pagos ya registrados se conservan.', 'Eliminar', function(){
+            saveRecurrentes(state.recurrentes.filter(function(x){return x.id!==existing.id;}), openAdminRecurrentes);
+          }, function(){ openRecForm(existing); });
+        });
+        sheet.querySelector('#rcSave').addEventListener('click', function(){
+          var err = sheet.querySelector('#rcErr');
+          var nombre = sheet.querySelector('#rcNombre').value.trim();
+          var monto = parseMoney(sheet.querySelector('#rcMonto').value);
+          var dia = Math.max(1, Math.min(31, Number(sheet.querySelector('#rcDia').value)||1));
+          var motoSel = sheet.querySelector('#rcMoto').value;
+          var cat = sheet.querySelector('#rcCat').value;
+          if(!nombre){ err.textContent='Escribe un nombre, por ejemplo "Seguro todo riesgo".'; err.hidden=false; return; }
+          if(!monto){ err.textContent='Escribe el valor mensual.'; err.hidden=false; return; }
+          var items = state.recurrentes.slice();
+          if(existing){
+            items = items.map(function(x){ return x.id!==existing.id ? x : Object.assign({}, x, {
+              nombre:nombre, monto:monto, dia:dia, categoria:cat, motoId: motoSel||null,
+              activo: sheet.querySelector('#rcActivo').value==='1' }); });
+          } else {
+            var ids = motoSel==='__todas' ? state.motos.filter(function(m){ return cuentaDeMoto(m)===cuentaAct; }).map(function(m){return m.id;}) : [motoSel||null];
+            if(ids.length===0){ err.textContent='Primero registra tus motos.'; err.hidden=false; return; }
+            ids.forEach(function(mid){
+              items.push({ id:'rec_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+                nombre:nombre, monto:monto, dia:dia, categoria:cat, motoId:mid, activo:true, desde: currentMonth, createdAt: Date.now() });
+            });
+          }
+          saveRecurrentes(items, function(){ showToast('Gasto fijo guardado.'); openAdminRecurrentes(); });
+        });
+      }
+    );
+  }
+
+  function subscribeNominaConfig(){
+    var un = db.doc(negocioPath('config')+'/nomina').onSnapshot(function(doc){
+      state.nominaConfig = doc.exists ? doc.data() : { ultimoReinicio: 0 };
+      render();
+    }, function(err){ console.error('config/nomina', err); });
+    unsubs.push(un);
+  }
+
+  function fmtMoney(n){
+    n = Number(n)||0;
+    return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n);
+  }
+  // Convierte cualquier forma en que alguien escriba una plata en pesos colombianos
+  // ("50.000", "1.500.000", "50,000", "$ 50000", con espacios, etc.) a un número
+  // entero limpio, quitando todo lo que no sea dígito. Así no importa si la
+  // persona usa el punto como separador de miles (como es normal en Colombia).
+  function parseMoney(v){
+    var s = String(v==null?'':v).trim();
+    // Si termina en un separador seguido de 1 o 2 dígitos ("75.000,50", "75000.00"),
+    // eso son centavos: se descartan. Antes se pegaban al número y "75000.00"
+    // quedaba como 7.500.000. Con 3 dígitos ("1.500") sí es separador de miles.
+    s = s.replace(/[.,]\d{1,2}$/, '');
+    var digits = s.replace(/[^0-9]/g,'');
+    return digits ? Number(digits) : 0;
+  }
+
+  // Comprime una foto (recibo/factura) a un data URL JPEG que quepa dentro del
+  // límite de tamaño de un registro de la base de datos (256 KB en total, así
+  // que dejamos margen: apuntamos a ~150 KB para el texto codificado de la
+  // imagen). Va reduciendo tamaño y calidad hasta que entra, o hasta rendirse
+  // después de varios intentos. No necesita el permiso especial de "editor" de
+  // Claude porque viaja igual que cualquier otro dato que ya guarda la app.
+  function compressImageToDataURL(file, maxBytes, done){
+    maxBytes = maxBytes || 150000;
+    var reader = new FileReader();
+    reader.onerror = function(){ done(null, 'No se pudo leer la imagen.'); };
+    reader.onload = function(){
+      var img = new Image();
+      img.onerror = function(){ done(null, 'El archivo no parece ser una imagen válida.'); };
+      img.onload = function(){
+        var sizes = [1400, 1100, 850, 650, 500, 380];
+        var qualities = [0.75, 0.6, 0.45, 0.3];
+        var best = null;
+        for(var s=0; s<sizes.length && !best; s++){
+          var maxDim = sizes[s];
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var w = Math.max(1, Math.round(img.width*scale)), h = Math.max(1, Math.round(img.height*scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); // fondo blanco por si la foto tiene transparencia
+          ctx.drawImage(img, 0, 0, w, h);
+          for(var q=0; q<qualities.length; q++){
+            var url = canvas.toDataURL('image/jpeg', qualities[q]);
+            if(url.length <= maxBytes){ best = url; break; }
+          }
+        }
+        if(best) done(best, null);
+        else done(null, 'La foto es muy pesada incluso reducida. Prueba con otra imagen.');
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    var d = new Date(iso+'T00:00:00');
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+  }
+  // Siempre calcula "hoy" en hora de Colombia (America/Bogota, UTC-5, sin horario
+  // de verano) sin importar la zona horaria configurada en el dispositivo de quien
+  // esté usando la app — así el dueño y todos los encargados ven la misma fecha.
+  function todayISO(){
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date());
+    } catch(e){
+      // Respaldo si el navegador no soporta zonas horarias con Intl: se calcula
+      // manualmente restando el desfase fijo de Bogotá desde UTC.
+      var utcMs = Date.now();
+      var bogota = new Date(utcMs - 5*60*60*1000);
+      var y = bogota.getUTCFullYear(), m = bogota.getUTCMonth()+1, day = bogota.getUTCDate();
+      return y+'-'+(m<10?'0'+m:m)+'-'+(day<10?'0'+day:day);
+    }
+  }
+  function monthKey(iso){ return (iso||'').slice(0,7); }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function daysUntil(iso){
+    if(!iso) return null;
+    // Se compara contra "hoy" en hora de Colombia, igual que el resto de la app.
+    var d = new Date(iso+'T00:00:00Z'), now = new Date(todayISO()+'T00:00:00Z');
+    if(isNaN(d)) return null;
+    return Math.round((d-now)/86400000);
+  }
+
+  var currentMonth = todayISO().slice(0,7); // mes real de hoy — usado para vencimientos, calendario y "días sin pago"
+  state.viewMonth = currentMonth; // mes que se está consultando en Resumen/Finanzas — navegable
+  document.getElementById('topMonth').textContent = new Date(currentMonth+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+  // Si la app queda abierta de un mes al otro (p. ej. del 31 al 1), el mes actual
+  // se quedaba congelado en el mes viejo. Ahora se revisa en cada pantalla.
+  function refreshToday(){
+    var nowMonth = todayISO().slice(0,7);
+    if(nowMonth!==currentMonth){
+      if(state.viewMonth===currentMonth) state.viewMonth = nowMonth;
+      currentMonth = nowMonth;
+      document.getElementById('topMonth').textContent = new Date(currentMonth+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    }
+  }
+
+  function shiftMonth(monthStr, delta){
+    var y = Number(monthStr.slice(0,4)), m = Number(monthStr.slice(5,7));
+    var d = new Date(y, m-1+delta, 1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
+  function renderMonthNav(){
+    var label = new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    var isCurrent = state.viewMonth===currentMonth;
+    return '<div class="month-nav">'
+      + '<button data-month-nav="-1" aria-label="Mes anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>'
+      + '<div class="label">'+label+'</div>'
+      + '<button data-month-nav="1" aria-label="Mes siguiente"'+(isCurrent?' disabled':'')+'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>'
+      + '</div>';
+  }
+  // Ingresos/gastos de UNA moto limitados a un mes específico (para el
+  // desglose "balance por moto" del mes que se está consultando). El balance
+  // de por vida sigue estando en el detalle de cada moto (computeMotoStats).
+  function computeMotoStatsForMonth(motoId, monthKeyStr){
+    var movs = state.movimientos.filter(function(m){return m.motoId===motoId && monthKey(m.fecha)===monthKeyStr;});
+    var ingresos = movs.filter(function(m){return m.tipo==='ingreso';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var gastosMov = movs.filter(function(m){return m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var mant = state.mantenimientos.filter(function(mt){return mt.motoId===motoId && monthKey(mt.fecha)===monthKeyStr;}).reduce(function(a,mt){return a+Number(mt.costo||0);},0);
+    var gastos = gastosMov + mant;
+    return { ingresos:ingresos, gastos:gastos, balance:ingresos-gastos };
+  }
+
+  function motoLabel(m){ return (m.placa||'Sin placa') + (m.marca?(' · '+m.marca+(m.modelo?' '+m.modelo:'')):''); }
+  function motoById(id){ return state.motos.find(function(m){return m.id===id;}); }
+
+  // Contabilidad por moto: ingresos por renta, gastos asociados, balance neto,
+  // y recuperación frente al valor de compra de esa moto en particular.
+  function computeMotoStats(motoId){
+    var movs = state.movimientos.filter(function(m){return m.motoId===motoId;});
+    var ingresos = movs.filter(function(m){return m.tipo==='ingreso';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var gastosMov = movs.filter(function(m){return m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var mant = state.mantenimientos.filter(function(mt){return mt.motoId===motoId;}).reduce(function(a,mt){return a+Number(mt.costo||0);},0);
+    var gastos = gastosMov + mant;
+    var balance = ingresos - gastos;
+    var compra = Number((motoById(motoId)||{}).valorCompra||0);
+    var recuperado = compra>0 ? Math.max(0, Math.min(100, Math.round((balance/compra)*100))) : null;
+    return { movs:movs, ingresos:ingresos, gastos:gastos, mant:mant, balance:balance, compra:compra, recuperado:recuperado };
+  }
+  // Número de WhatsApp Business de RZ Rentas: los botones de WhatsApp abren un
+  // chat hacia este número con el mensaje de la alerta ya redactado (el
+  // encargado o tú solo tocan "Enviar" — no es envío automático real, eso
+  // requiere la API oficial de WhatsApp Business con aprobación de Meta).
+  var WHATSAPP_NUMBER = '573124726450';
+  function waHref(msg){ return 'https://wa.me/'+WHATSAPP_NUMBER + (msg ? ('?text='+encodeURIComponent(msg)) : ''); }
+  // Normaliza un número de celular colombiano a formato internacional (57 + 10 dígitos)
+  // para armar un link de WhatsApp directo, sin importar cómo lo hayan escrito
+  // (con espacios, guiones, +57 al inicio, etc.).
+  function normalizePhoneCO(v){
+    var digits = String(v||'').replace(/[^0-9]/g,'');
+    if(!digits) return '';
+    if(digits.length===10) return '57'+digits; // celular local de 10 dígitos
+    if(digits.length===12 && digits.slice(0,2)==='57') return digits; // ya viene con 57
+    if(digits.length===13 && digits.slice(0,3)==='057') return digits.slice(1);
+    return digits; // se deja tal cual si no calza con los formatos usuales
+  }
+  function waHrefTo(phone, msg){
+    var n = normalizePhoneCO(phone);
+    if(!n) return '';
+    return 'https://wa.me/'+n + (msg ? ('?text='+encodeURIComponent(msg)) : '');
+  }
+  var topWaBtnEl = document.getElementById('topWaBtn');
+  if(topWaBtnEl) topWaBtnEl.href = waHref();
+  function waBtn(msg){
+    return '<a class="wa-btn" href="'+waHref(msg)+'" target="_blank" rel="noopener" aria-label="Enviar por WhatsApp" onclick="event.stopPropagation()">'
+      + '<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.05L2 22l5.1-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm5.2 14.3c-.22.62-1.28 1.19-1.77 1.24-.45.05-.94.24-3.17-.66-2.68-1.08-4.42-3.8-4.56-3.98-.13-.18-1.09-1.45-1.09-2.76 0-1.32.69-1.96.94-2.23.24-.26.53-.32.7-.32h.5c.17 0 .38-.03.6.45.22.5.73 1.72.8 1.84.06.13.1.28.02.45-.09.17-.13.28-.26.43-.13.15-.27.34-.39.46-.13.13-.26.27-.11.53.15.26.67 1.09 1.43 1.76.98.86 1.8 1.13 2.06 1.26.26.13.41.11.56-.07.15-.17.65-.75.82-1.01.17-.26.35-.22.58-.13.24.09 1.5.7 1.75.83.26.13.43.19.5.3.06.11.06.63-.16 1.24Z"/></svg>'
+      + '</a>';
+  }
+
+  var GASTO_ALTO_SIN_NOTA = 300000;
+
+  // Alertas automáticas: se calculan de los datos compartidos (motos/movimientos),
+  // así que su existencia no es secreta — solo se OCULTA la pestaña a quien no sea
+  // el dueño de la app. La privacidad real (notas de "sospechoso") va en la
+  // colección "supervision", protegida por reglas de la base de datos.
+  function computeAutoAlerts(){
+    var out = [];
+    state.motos.forEach(function(m){
+      var missed = computeMissedDays(m.id, currentMonth);
+      if(missed.length>0){
+        var mensaje = missed.length===1
+          ? 'Marcada como rentada, sin renta registrada el '+fmtDate(missed[0])
+          : missed.length+' días sin renta registrada este mes (desde '+fmtDate(missed[0])+')';
+        out.push({tipo:'sin_pago', motoPlaca:m.placa, mensaje:mensaje, diasSinPago:missed.length});
+      }
+    });
+    state.movimientos.forEach(function(mv){
+      if(mv.tipo==='gasto' && Number(mv.monto||0)>=GASTO_ALTO_SIN_NOTA && !(mv.nota&&mv.nota.trim())){
+        out.push({tipo:'gasto_sin_nota', motoPlaca:mv.motoPlaca||'General', mensaje:'Gasto de '+fmtMoney(mv.monto)+' ('+(mv.categoria||'')+') sin nota que lo justifique', movId:mv.id, fecha:mv.fecha});
+      }
+    });
+    return out;
+  }
+  function supervisionDoc(movId){ return state.supervision.find(function(s){return s.id===movId;}); }
+
+  // Días del mes en que la moto estuvo "rentada" y no se registró pago de renta.
+  // El día de HOY nunca se cuenta como "en mora" (todavía puede pagarse antes de
+  // que termine) — solo días anteriores ya cerrados y sin pago registrado.
+  // Si no se definió fecha de inicio de renta, no hay nada que evaluar aún.
+  function computeMissedDays(motoId, monthKeyStr){
+    var m = motoById(motoId);
+    if(!m || m.estado!=='rentada') return [];
+    var today = todayISO();
+    var paidDates = {};
+    state.movimientos.forEach(function(mv){
+      if(mv.motoId===motoId && mv.tipo==='ingreso' && mv.categoria==='Renta') paidDates[mv.fecha]=true;
+    });
+    if(!m.fechaInicioRenta){
+      return [];
+    }
+    var year = Number(monthKeyStr.slice(0,4)), month = Number(monthKeyStr.slice(5,7));
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var missed = [];
+    for(var d=1; d<=daysInMonth; d++){
+      var iso = monthKeyStr+'-'+(d<10?'0'+d:d);
+      if(iso>=today) break;
+      if(iso<m.fechaInicioRenta) continue;
+      if(!paidDates[iso]) missed.push(iso);
+    }
+    return missed;
+  }
+
+  // Calendario de pagos de una moto para CUALQUIER mes. Los pagos nunca se
+  // borran al cambiar de mes: cada renta queda guardada con su fecha, y aquí
+  // se puede navegar hacia atrás para verificar día por día.
+  var calMonth = null;
+  function rentaDelDia(motoId, iso){
+    // Junta la parte "Renta" y su parte de nómina para mostrar lo cobrado completo.
+    var rentas = state.movimientos.filter(function(mv){ return mv.motoId===motoId && mv.tipo==='ingreso' && mv.categoria==='Renta' && mv.fecha===iso; });
+    return rentas.map(function(r){
+      var extra = state.movimientos.filter(function(mv){ return (mv.tipo==='nomina' || (mv.tipo==='deposito' && mv.categoria==='Depósito reembolsable')) && mv.motoId===motoId && mv.fecha===iso && mv.createdAt===r.createdAt; })
+        .reduce(function(a,mv){ return a+Number(mv.monto||0); },0);
+      return { renta:r, cobrado:Number(r.monto||0)+extra };
+    });
+  }
+  function renderMotoCalendar(motoId){
+    var m = motoById(motoId);
+    var mk = calMonth || currentMonth;
+    var labelMes = new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    var html = '<div class="section-title" style="margin-top:20px;">Calendario de pagos</div>';
+    html += '<div class="month-nav">'
+      + '<button data-cal-month="-1" aria-label="Mes anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>'
+      + '<div class="label">'+labelMes+'</div>'
+      + '<button data-cal-month="1" aria-label="Mes siguiente"'+(mk>=currentMonth?' disabled':'')+'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>'
+      + '</div>';
+
+    var evaluaMora = m.estado==='rentada' && !!m.fechaInicioRenta;
+    var missedSet = {};
+    if(evaluaMora) computeMissedDays(motoId, mk).forEach(function(iso){ missedSet[iso]=true; });
+    var paidSet = {};
+    state.movimientos.forEach(function(mv){
+      if(mv.motoId===motoId && mv.tipo==='ingreso' && mv.categoria==='Renta' && monthKey(mv.fecha)===mk) paidSet[mv.fecha]=true;
+    });
+    var year = Number(mk.slice(0,4)), month = Number(mk.slice(5,7));
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var firstDow = (new Date(year, month-1, 1).getDay()+6)%7; // 0=lunes
+    var today = todayISO();
+
+    html += '<div class="cal-head-row">' + ['L','M','M','J','V','S','D'].map(function(d){return '<div>'+d+'</div>';}).join('') + '</div>';
+    html += '<div class="cal-grid">';
+    for(var i=0;i<firstDow;i++) html += '<div class="cal-day blank"></div>';
+    for(var d=1; d<=daysInMonth; d++){
+      var iso = mk+'-'+(d<10?'0'+d:d);
+      var cls = 'cal-day';
+      var clickAttr = '';
+      if(iso>today) cls += ' blank';
+      else if(paidSet[iso]){ cls += ' paid clickable'; clickAttr = ' data-cal-info="'+iso+'"'; }
+      else if(missedSet[iso]){ cls += ' miss clickable'; clickAttr = ' data-cal-pay="'+iso+'"'; }
+      if(iso===today) cls += ' today';
+      html += '<div class="'+cls+'"'+clickAttr+'>'+d+'</div>';
+    }
+    html += '</div>';
+    html += '<div class="cal-legend">'
+      + '<span><span class="cal-dot paid"></span>Pagado (toca para ver el detalle)</span>'
+      + (evaluaMora ? '<span><span class="cal-dot miss"></span>Sin pago (toca para registrarlo)</span>' : '')
+      + '<span><span class="cal-dot blank"></span>Sin registro</span>'
+      + '</div>';
+    if(!evaluaMora){
+      html += '<div class="owner-only-note" style="margin-top:-8px;">'+(m.estado==='rentada'
+        ? 'Define la "Fecha de inicio de renta" al editar la moto para marcar en rojo los días sin pago.'
+        : 'La moto no está "Rentada" ahora, así que no se marcan días sin pago. Los pagos que sí se registraron se ven en verde.')+'</div>';
+    }
+
+    // Lista de pagos del mes: lo que se puede revisar uno por uno.
+    var pagos = [];
+    Object.keys(paidSet).sort().forEach(function(iso){
+      rentaDelDia(motoId, iso).forEach(function(p){ pagos.push({fecha:iso, cobrado:p.cobrado, renta:p.renta}); });
+    });
+    var totalMes = pagos.reduce(function(a,p){return a+p.cobrado;},0);
+    var diasPagados = Object.keys(paidSet).length;
+    var diasSinPago = Object.keys(missedSet).length;
+    html += '<div class="stat-list" style="margin-top:4px;">'
+      + statRow('Días pagados en '+new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long'}), diasPagados+' día(s)', 'pos')
+      + (evaluaMora ? statRow('Días sin pago', diasSinPago+' día(s)', diasSinPago?'neg':'') : '')
+      + statRowTotal('Total cobrado en renta', fmtMoney(totalMes), 'pos')
+      + '</div>';
+    if(pagos.length){
+      html += '<div class="list" id="calPagosList">' + pagos.map(function(p){
+        var reg = p.renta.createdAt ? new Date(p.renta.createdAt).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'short',hour:'numeric',minute:'2-digit'}) : '';
+        return '<div class="row-card" id="pago-'+p.fecha+'"><div class="main">'
+          + '<div class="title">'+fmtDate(p.fecha)+'</div>'
+          + '<div class="meta">'+(reg?('Registrado '+reg):'')+(p.renta.nota?(' · '+escapeHtml(p.renta.nota)):'')+'</div></div>'
+          + '<div class="amount pos">+'+fmtMoney(p.cobrado)+'</div></div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  function generalStats(){
+    var movs = state.movimientos.filter(function(m){return !m.motoId;});
+    var ingresos = movs.filter(function(m){return m.tipo==='ingreso';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var gastos = movs.filter(function(m){return m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    return { movs:movs, ingresos:ingresos, gastos:gastos, balance:ingresos-gastos };
+  }
+
+  // Todo lo que suma o resta en el saldo de un mes, en una sola lista: ingresos y
+  // gastos de Finanzas + costos de la pestaña Mantenimiento. Resumen y Finanzas
+  // usan esta misma función, así que ya no pueden mostrar cifras distintas.
+  function monthItems(mk, cuenta){
+    var items = [];
+    cuenta = cuenta || '';
+    state.movimientos.forEach(function(m){
+      if(monthKey(m.fecha)!==mk) return;
+      if(cuentaDeMov(m)!==cuenta) return;
+      if(m.tipo!=='ingreso' && m.tipo!=='gasto') return; // la nómina separada no entra al saldo
+      items.push({ id:m.id, kind:'mov', signo:(m.tipo==='ingreso'?1:-1), monto:Number(m.monto||0), fecha:m.fecha,
+        titulo:m.categoria||(m.tipo==='ingreso'?'Ingreso':'Gasto'), motoId:m.motoId||null, placa:m.motoPlaca||(motoById(m.motoId)||{}).placa||null,
+        nota:m.nota||'', createdAt:Number(m.createdAt||0), fuente:'Finanzas', raw:m });
+    });
+    state.mantenimientos.forEach(function(mt){
+      if(monthKey(mt.fecha)!==mk) return;
+      if(cuentaDeMant(mt)!==cuenta) return;
+      var c = Number(mt.costo||0); if(!c) return;
+      items.push({ id:mt.id, kind:'mant', signo:-1, monto:c, fecha:mt.fecha, titulo:mt.tipo||'Mantenimiento',
+        motoId:mt.motoId||null, placa:mt.motoPlaca||null, nota:mt.notas||'', createdAt:Number(mt.createdAt||0), fuente:'Mantenimiento', raw:mt });
+    });
+    items.sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'') || (b.createdAt-a.createdAt); });
+    var ingresos = 0, gastos = 0;
+    items.forEach(function(it){ if(it.signo>0) ingresos += it.monto; else gastos += it.monto; });
+    return { items:items, ingresos:ingresos, gastos:gastos, neto:ingresos-gastos };
+  }
+
+  // Revisa los registros del mes buscando lo que suele descuadrar el saldo.
+  function monthWarnings(mk, items){
+    var out = [];
+    var mants = items.filter(function(i){return i.kind==='mant';});
+    var gastosMant = items.filter(function(i){return i.kind==='mov' && i.signo<0 && /manten|repuest|aceite|llanta|freno/i.test(i.titulo+' '+i.nota);});
+    mants.forEach(function(mt){
+      gastosMant.forEach(function(g){
+        if(g.motoId===mt.motoId && (g.monto===mt.monto || g.fecha===mt.fecha)){
+          out.push('<b>Posible gasto cobrado dos veces</b>'+escapeHtml(mt.placa||'')+': "'+escapeHtml(mt.titulo)+'" de '+fmtMoney(mt.monto)+' está en Mantenimiento, y hay un gasto "'+escapeHtml(g.titulo)+'" de '+fmtMoney(g.monto)+' en Finanzas ('+fmtDate(g.fecha)+'). Si son el mismo, borra uno de los dos.');
+        }
+      });
+    });
+    // Mismo monto, misma moto, misma fecha, mismo tipo: casi seguro un doble registro.
+    var seen = {};
+    items.forEach(function(it){
+      var k = it.kind+'|'+it.signo+'|'+(it.motoId||'-')+'|'+it.fecha+'|'+it.monto+'|'+it.titulo;
+      if(seen[k]) out.push('<b>Registro repetido</b>'+escapeHtml(it.titulo)+' de '+fmtMoney(it.monto)+' el '+fmtDate(it.fecha)+(it.placa?(' ('+escapeHtml(it.placa)+')'):'')+' aparece dos veces.');
+      seen[k] = true;
+    });
+    // Nómina pagada como gasto: los $5.000 diarios ya se descontaron de cada renta.
+    items.forEach(function(it){
+      if(it.kind==='mov' && it.signo<0 && /n[oó]mina|sueldo|salario|pago encargado|administraci/i.test(it.titulo+' '+it.nota)){
+        out.push('<b>¿Nómina registrada como gasto?</b>'+fmtMoney(it.monto)+' ('+escapeHtml(it.titulo)+(it.nota?(': '+escapeHtml(it.nota)):'')+', '+fmtDate(it.fecha)+'). La nómina ya se separa sola de cada renta ('+fmtMoney(ADMIN_DIARIO)+' por día). Si además la registras como gasto, se descuenta dos veces.');
+      }
+    });
+    // Gastos registrados en un mes pero con fecha de otro (fecha mal puesta).
+    items.forEach(function(it){
+      if(it.signo<0 && it.createdAt){
+        var reg = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(it.createdAt));
+        if(reg.slice(0,7)!==monthKey(it.fecha) && reg < it.fecha){
+          out.push('<b>Gasto con fecha adelantada</b>'+escapeHtml(it.titulo)+' de '+fmtMoney(it.monto)+' se registró el '+fmtDate(reg)+' pero tiene fecha '+fmtDate(it.fecha)+', por eso cuenta en este mes. Si fue un error, corrige la fecha.');
+        }
+      }
+    });
+    return out;
+  }
+
+  function renderDesglose(mk, open, cuenta){
+    var r = monthItems(mk, cuenta);
+    var warns = monthWarnings(mk, r.items);
+    var html = '<details class="desglose"'+(open?' open':'')+'><summary><span>¿De dónde sale este saldo?</span><span class="chev">'+r.items.length+' registro(s)'+(warns.length?(' · '+warns.length+' a revisar'):'')+'</span></summary><div class="body">';
+    warns.forEach(function(w){ html += '<div class="warn-box">'+w+'</div>'; });
+    if(r.items.length===0){
+      html += '<div class="owner-only-note" style="margin:0;">No hay nada registrado con fecha de este mes. El saldo arranca en $0 cada mes.</div>';
+    } else {
+      r.items.forEach(function(it){
+        var reg = it.createdAt ? new Date(it.createdAt).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'short',hour:'numeric',minute:'2-digit'}) : '';
+        html += '<div class="dg-row"><div class="main"><div class="t">'+escapeHtml(it.titulo)+'<span class="dg-src">'+it.fuente+'</span></div>'
+          + '<div class="m">'+fmtDate(it.fecha)+' · '+(it.placa?escapeHtml(it.placa):'General')+(it.nota?(' · '+escapeHtml(it.nota)):'')+(reg?(' · registrado '+reg):'')+'</div></div>'
+          + '<div class="amt '+(it.signo>0?'pos':'neg')+'">'+(it.signo>0?'+':'−')+fmtMoney(it.monto)+'</div></div>';
+      });
+      html += '<div class="dg-total"><span>Ingresos '+fmtMoney(r.ingresos)+' − Gastos '+fmtMoney(r.gastos)+'</span><span style="color:'+(r.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(r.neto)+'</span></div>';
+      html += '<div class="owner-only-note" style="margin:8px 0 0;">El saldo del mes arranca en $0: no arrastra lo del mes anterior. Si hoy se registra un gasto antes que las rentas, el mes se ve en negativo hasta que entren las rentas. La nómina ('+fmtMoney(ADMIN_DIARIO)+' por renta) no aparece aquí porque se aparta antes.</div>';
+    }
+    html += '</div></details>';
+    return html;
+  }
+
+  // ---------- render root ----------
+  function render(){
+    refreshToday();
+    var view = document.getElementById('view');
+    if(state.tab==='resumen') view.innerHTML = renderResumen();
+    else if(state.tab==='finanzas') view.innerHTML = renderFinanzas();
+    else if(state.tab==='motos') view.innerHTML = renderMotos();
+    else if(state.tab==='mantenimiento') view.innerHTML = renderMantenimiento();
+    else if(state.tab==='gps') view.innerHTML = renderGps();
+    else if(state.tab==='supervision') view.innerHTML = isOwnerView ? renderSupervision() : '<div class="empty">No tienes acceso a esta sección.</div>';
+    renderFab();
+    wireView();
+  }
+
+  // ---------- RESUMEN ----------
+  function renderResumen(){
+    // Resumen = solo las cuentas de RZ Rentas. Las motos de otros propietarios
+    // se ven aparte (tarjeta "Cuentas aparte" y en Finanzas).
+    var motosRZ = state.motos.filter(function(m){ return !cuentaDeMoto(m); });
+    var movsRZ = state.movimientos.filter(function(m){ return cuentaDeMov(m)===''; });
+    var mantsRZ = state.mantenimientos.filter(function(mt){ return cuentaDeMant(mt)===''; });
+    var movMes = movsRZ.filter(function(m){return monthKey(m.fecha)===state.viewMonth && (m.tipo==='ingreso'||m.tipo==='gasto');});
+    var mantMes = mantsRZ.filter(function(mt){return monthKey(mt.fecha)===state.viewMonth;}).reduce(function(a,mt){return a+Number(mt.costo||0);},0);
+    var resumenMes = monthItems(state.viewMonth, '');
+    var ingresos = resumenMes.ingresos, gastos = resumenMes.gastos, neto = resumenMes.neto;
+    var disponibles = motosRZ.filter(function(m){return m.estado==='disponible';}).length;
+    var total = motosRZ.length;
+
+    var histMant = mantsRZ.reduce(function(a,mt){return a+Number(mt.costo||0);},0);
+    var histIngresos = movsRZ.filter(function(m){return m.tipo==='ingreso';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    var histGastos = movsRZ.filter(function(m){return m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0) + histMant;
+
+    var alertasPend = state.alertas.filter(function(a){return !a.atendida;})
+      .sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');}).slice(0,4);
+
+    var vtos = [];
+    state.mantenimientos.forEach(function(mt){
+      if(mt.proximoVencimiento){
+        var d = daysUntil(mt.proximoVencimiento);
+        if(d!==null && d<=30) vtos.push({mt:mt, dias:d});
+      }
+    });
+    vtos.sort(function(a,b){return a.dias-b.dias;});
+
+    var html = '';
+    html += renderMonthNav();
+    html += '<div class="cards-grid">';
+    html += card('Ingresos del mes', fmtMoney(ingresos), 'pos');
+    html += card('Gastos del mes', fmtMoney(gastos), 'neg');
+    html += '<div class="card wide"><div class="label">Rentabilidad del mes</div>'
+          + '<div class="value '+(neto>=0?'pos':'neg')+'">'+fmtMoney(neto)+'</div>'
+          + '<div class="sub">'+movMes.length+' movimiento(s) financiero(s)'+(mantMes>0?(' + '+fmtMoney(mantMes)+' en mantenimiento'):'')+' este mes</div></div>';
+    html += '<div class="card wide"><div class="label">Flota</div>'
+          + '<div class="value">'+disponibles+' / '+total+'</div>'
+          + '<div class="sub">motos de RZ disponibles'+(state.motos.length>total?(' · '+(state.motos.length-total)+' moto(s) de otros propietarios no se cuentan aquí'):'')+'</div></div>';
+    var gGenMes = movMes.filter(function(m){return !m.motoId && m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
+    html += '<div class="card wide"><div class="label">Gastos generales del mes</div>'
+          + '<div class="value neg">'+fmtMoney(gGenMes)+'</div>'
+          + '<div class="sub">gastos no asociados a una moto en particular (administrativos, etc.)</div></div>';
+    html += '<div class="card wide"><div class="label">Total histórico (todos los meses)</div>'
+          + '<div class="value '+(histIngresos-histGastos>=0?'pos':'neg')+'">'+fmtMoney(histIngresos-histGastos)+'</div>'
+          + '<div class="sub">Ingresos '+fmtMoney(histIngresos)+' · Gastos '+fmtMoney(histGastos)+' desde que empezaste a usar el panel</div></div>';
+    html += '</div>';
+    html += renderDesglose(state.viewMonth, neto<0, '');
+    cuentasTerceros().forEach(function(c){
+      var rc = monthItems(state.viewMonth, c);
+      var nMotos = state.motos.filter(function(m){ return cuentaDeMoto(m)===c; }).length;
+      html += '<div class="row-card tap" data-go-cuenta="'+escapeHtml(c)+'" style="margin-top:10px;"><div class="main">'
+        + '<div class="title">Cuenta aparte · '+escapeHtml(c)+'</div>'
+        + '<div class="meta">'+nMotos+' moto(s) · Ingresos '+fmtMoney(rc.ingresos)+' · Gastos '+fmtMoney(rc.gastos)+' · no se suma a RZ. Toca para ver su cuenta.</div></div>'
+        + '<div class="amount" style="color:'+(rc.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(rc.neto)+'</div></div>';
+    });
+    var recPend = recurrentesDelMes(state.viewMonth, '').filter(function(x){return !x.pago;});
+    if(recPend.length){
+      var vencidos = recPend.filter(function(x){return x.vencido;}).length;
+      html += '<div class="row-card tap" id="goRecurrentes" style="margin-top:10px;"><div class="main">'
+        + '<div class="title">Gastos fijos sin registrar: '+recPend.length+'</div>'
+        + '<div class="meta">'+fmtMoney(recPend.reduce(function(a,x){return a+Number(x.rec.monto||0);},0))+(vencidos?(' · '+vencidos+' ya vencido(s)'):'')+' · toca para registrarlos en Finanzas</div></div>'
+        + '<span class="pill '+(vencidos?'bad':'warn')+'">Pendiente</span></div>';
+    }
+
+    html += '<div class="section-title">Balance por moto — '+new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'})+'</div>';
+    if(motosRZ.length===0){
+      html += '<div class="empty">Aún no tienes motos registradas.</div>';
+    } else {
+      html += '<div class="list">' + motosRZ.map(function(m){
+        var s = computeMotoStatsForMonth(m.id, state.viewMonth);
+        return '<div class="moto-balance-row" data-open-moto="'+m.id+'">'
+          + '<div class="main"><div class="title">'+escapeHtml(m.placa)+'</div>'
+          + '<div class="meta">Renta '+fmtMoney(s.ingresos)+' · Gastos '+fmtMoney(s.gastos)+'</div></div>'
+          + '<div class="amount" style="color:'+(s.balance>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(s.balance)+'</div>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+
+    html += '<div class="section-title">Alertas sin atender</div>';
+    if(alertasPend.length===0){
+      html += '<div class="empty">Sin alertas pendientes.</div>';
+    } else {
+      html += '<div class="list">' + alertasPend.map(function(a){
+        var m = motoById(a.motoId);
+        var placa = a.motoPlaca||(m?m.placa:'Moto');
+        var msg = 'Alerta '+labelTipoAlerta(a.tipo)+' — Moto '+placa+(a.descripcion?(': '+a.descripcion):'')+' ('+fmtDate(a.fecha)+')';
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(placa)+' · '+labelTipoAlerta(a.tipo)+'</div>'
+          + '<div class="meta">'+escapeHtml(a.descripcion||'')+' · '+fmtDate(a.fecha)+'</div></div>'
+          + '<span class="pill bad">Pendiente</span>' + waBtn(msg) + '</div>';
+      }).join('') + '</div>';
+    }
+
+    html += '<div class="section-title">Próximos vencimientos (30 días)</div>';
+    if(vtos.length===0){
+      html += '<div class="empty">No hay vencimientos próximos registrados.</div>';
+    } else {
+      html += '<div class="list">' + vtos.map(function(v){
+        var m = motoById(v.mt.motoId);
+        var placa = v.mt.motoPlaca||(m?m.placa:'Moto');
+        var pill = v.dias<0 ? '<span class="pill bad">Vencido</span>' : (v.dias<=7 ? '<span class="pill warn">'+v.dias+' d</span>' : '<span class="pill ok">'+v.dias+' d</span>');
+        var msg = 'Recordatorio: la moto '+placa+' tiene '+v.mt.tipo+' con vencimiento el '+fmtDate(v.mt.proximoVencimiento)+'.';
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(placa)+' · '+escapeHtml(v.mt.tipo)+'</div>'
+          + '<div class="meta">Vence '+fmtDate(v.mt.proximoVencimiento)+'</div></div>' + pill + waBtn(msg) + '</div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+  function card(label, value, cls){
+    return '<div class="card"><div class="label">'+label+'</div><div class="value '+(cls||'')+'">'+value+'</div></div>';
+  }
+  function labelTipoAlerta(t){
+    return t==='zona' ? 'Salida de zona' : t==='horario' ? 'Horario inusual' : 'Alerta';
+  }
+
+  // ---------- FINANZAS ----------
+  function renderFinanzas(){
+    var terceros = cuentasTerceros();
+    if(state.cuenta && terceros.indexOf(state.cuenta)<0) state.cuenta = '';
+    var cuenta = state.cuenta || '';
+    var movMes = state.movimientos.filter(function(m){return monthKey(m.fecha)===state.viewMonth && (m.tipo==='ingreso'||m.tipo==='gasto') && cuentaDeMov(m)===cuenta;})
+      .sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+    var rm = monthItems(state.viewMonth, cuenta);
+    var mantItems = rm.items.filter(function(i){return i.kind==='mant';});
+    var mantTotal = mantItems.reduce(function(a,i){return a+i.monto;},0);
+
+    var html = '';
+    if(terceros.length){
+      html += '<div class="moto-select-strip" role="tablist" aria-label="Cuenta">'
+        + [''].concat(terceros).map(function(c){
+            return '<button data-cuenta="'+escapeHtml(c)+'" class="'+(c===cuenta?'active':'')+'">'+escapeHtml(nombreCuenta(c))+'</button>';
+          }).join('')
+        + '</div>';
+      if(cuenta) html += '<div class="banner">Estás viendo la cuenta de <b>'+escapeHtml(cuenta)+'</b>. Su plata y sus gastos van aparte y no se suman a RZ Rentas.</div>';
+    }
+    html += renderMonthNav();
+    html += '<div class="cards-grid">'
+      + card('Ingresos', fmtMoney(rm.ingresos), 'pos')
+      + card('Gastos (incl. mantenimiento)', fmtMoney(rm.gastos), 'neg')
+      + '<div class="card wide"><div class="label">Saldo del mes</div><div class="value '+(rm.neto>=0?'pos':'neg')+'">'+fmtMoney(rm.neto)+'</div>'
+      + '<div class="sub">'+(cuenta?('Solo motos de '+escapeHtml(cuenta)):'Es la misma cifra de "Rentabilidad del mes" en Resumen')+(mantTotal?(' · incluye '+fmtMoney(mantTotal)+' de la pestaña Mantenimiento'):'')+'</div></div>'
+      + '</div>';
+    if(cuenta){
+      html += '<div class="owner-only-note" style="margin-top:8px;">De cada pago de renta de estas motos se separan '+fmtMoney(DEPOSITO_DIARIO)+' de depósito reembolsable. No se aparta nómina ni se le cobra nada a favor de RZ.</div>';
+      html += '<div class="cards-grid" style="margin-top:10px;">' + card('Depósitos por devolver', fmtMoney(depositosEnCustodia(cuenta)), '') + '</div>';
+    } else {
+      html += '<div class="owner-only-note" style="margin-top:8px;">De cada pago de renta ya se separaron '+fmtMoney(ADMIN_DIARIO)+' para nómina y '+fmtMoney(DEPOSITO_DIARIO)+' de depósito reembolsable, así que no están en "Ingresos". Por eso, cuando pagues la nómina o devuelvas un depósito, no lo registres también como gasto.</div>';
+    }
+    if(isOwnerView && !cuenta){
+      html += '<div class="cards-grid" style="margin-top:10px;">' + card('Nómina/administración acumulada', fmtMoney(nominaAcumulada()), 'pos')
+        + card('Depósitos por devolver', fmtMoney(depositosEnCustodia('')), '') + '</div>';
+      html += '<div class="owner-only-note" style="margin-top:6px;">"Depósitos por devolver" es la plata de los arrendatarios que tienes guardada (suma de todas las motos). No es ingreso tuyo hasta que se retenga algo al liquidar.</div>';
+      html += '<div class="sheet-actions" style="margin-top:-4px; margin-bottom:10px;"><button class="btn ghost" id="reiniciarNomina">Ya pagué la nómina — reiniciar a $0</button></div>';
+    }
+    html += renderRecurrentes(state.viewMonth, cuenta);
+    html += '<div class="section-title">Movimientos de '+new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'})+'</div>';
+    if(mantItems.length>0){
+      html += '<div class="owner-only-note" style="margin:-4px 0 8px;">Los registros marcados "Mantenimiento" vienen de esa pestaña; se editan o borran allá.</div>';
+    }
+    if(movMes.length===0 && mantItems.length===0){
+      html += '<div class="empty"><b>Sin movimientos en este mes</b>'+(state.viewMonth===currentMonth?'Registra tu primer ingreso o gasto con el botón +.':'No se registró actividad en este mes.')+'</div>';
+    } else {
+      html += '<div class="list">' + movMes.map(function(m){
+        var moto = motoById(m.motoId);
+        var flagged = isOwnerView && supervisionDoc(m.id);
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(m.categoria||(m.tipo==='ingreso'?'Ingreso':'Gasto'))+'</div>'
+          + '<div class="meta">'+fmtDate(m.fecha)+' · '+(moto?escapeHtml(moto.placa):'General')+(m.nota?(' · '+escapeHtml(m.nota)):'')+'</div></div>'
+          + '<div class="amount '+(m.tipo==='ingreso'?'pos':'neg')+'">'+(m.tipo==='ingreso'?'+':'-')+fmtMoney(m.monto)+'</div>'
+          + (m.fotoUrl ? '<button class="del photo-badge" data-view-photo-mov="'+m.id+'" aria-label="Ver foto del recibo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></button>' : '')
+          + (isOwnerView ? '<button class="flag'+(flagged?' on':'')+'" data-flag-mov="'+m.id+'" data-flag-placa="'+escapeHtml(moto?moto.placa:'General')+'" aria-label="Marcar sospechoso"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18M5 4h11l-2 4 2 4H5"/></svg></button>' : '')
+          + (isOwnerView ? '<button class="del" data-edit-mov="'+m.id+'" aria-label="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' : '')
+          + (isOwnerView ? '<button class="del" data-del-mov="'+m.id+'" aria-label="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>' : '')
+          + '</div>';
+      }).join('') + mantItems.map(function(it){
+        return '<div class="row-card tap" data-open-mant="'+it.id+'"><div class="main">'
+          + '<div class="title">'+escapeHtml(it.titulo)+'<span class="dg-src">Mantenimiento</span></div>'
+          + '<div class="meta">'+fmtDate(it.fecha)+' · '+(it.placa?escapeHtml(it.placa):'General')+(it.nota?(' · '+escapeHtml(it.nota)):'')+'</div></div>'
+          + '<div class="amount neg">-'+fmtMoney(it.monto)+'</div></div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  // ---------- MOTOS ----------
+  function estadoPill(estado){
+    if(estado==='disponible') return '<span class="pill ok">Disponible</span>';
+    if(estado==='rentada') return '<span class="pill warn">Rentada</span>';
+    if(estado==='mantenimiento') return '<span class="pill bad">En mantenimiento</span>';
+    return '<span class="pill muted">'+escapeHtml(estado||'—')+'</span>';
+  }
+  function renderMotos(){
+    var html = '';
+    if(state.motos.length===0){
+      html += '<div class="section-title">Inventario (0)</div>';
+      html += '<div class="empty"><b>Aún no tienes motos registradas</b>Agrega tu primera moto con el botón +.</div>';
+      return html;
+    }
+    [''].concat(cuentasTerceros()).forEach(function(c){
+      var grupo = state.motos.filter(function(m){ return cuentaDeMoto(m)===c; });
+      if(!grupo.length) return;
+      html += '<div class="section-title">'+(c?('Motos de '+escapeHtml(c)+' · cuenta aparte'):'Motos de RZ Rentas')+' ('+grupo.length+')</div>';
+      html += '<div class="list" style="margin-bottom:6px;">' + grupo.map(function(m){
+        var st = computeMotoStats(m.id);
+        var missed = computeMissedDays(m.id, currentMonth);
+        return '<div class="row-card tap" data-open-moto="'+m.id+'"><div class="main">'
+          + '<div class="title">'+escapeHtml(m.placa||'Sin placa')+(m.marca?(' · '+escapeHtml(m.marca)+(m.modelo?' '+escapeHtml(m.modelo):'')):'')+'</div>'
+          + '<div class="meta">'+(m.tarifaDiaria?fmtMoney(m.tarifaDiaria)+'/día · ':'')+(m.kilometraje?Number(m.kilometraje).toLocaleString('es-CO')+' km':'sin km registrado')+'</div>'
+          + '<div class="meta2">'+(st.compra?('Compra '+fmtMoney(st.compra)+' · '):'')+'Balance <span style="color:'+(st.balance>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(st.balance)+'</span>'+(st.recuperado!==null?(' · '+st.recuperado+'% recuperado'):'')+'</div>'
+          + (function(){ var dp = depositoMoto(m.id); return (dp.total>0 || m.estado==='rentada') ? '<div class="meta2">Depósito acumulado: <b style="color:var(--accent-strong)">'+fmtMoney(dp.total)+'</b> ('+dp.dias+' día'+(dp.dias===1?'':'s')+' pagado'+(dp.dias===1?'':'s')+')</div>' : ''; })()
+          + '</div>'
+          + (missed.length>0 ? '<span class="pill bad">'+missed.length+' sin pago</span>' : '')
+          + estadoPill(m.estado)
+          + '<button class="del" data-del-moto="'+m.id+'" aria-label="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>'
+          + '</div>';
+      }).join('') + '</div>';
+    });
+    return html;
+  }
+
+  // ---------- MANTENIMIENTO ----------
+  function renderMantenimiento(){
+    var html = motoFilterStrip();
+    var list = state.mantenimientos.slice().sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+    if(state.motoFilter!=='todas') list = list.filter(function(mt){return mt.motoId===state.motoFilter;});
+
+    html += '<div class="section-title">Historial de mantenimiento</div>';
+    if(state.motos.length===0){
+      html += '<div class="empty"><b>Primero registra una moto</b>Ve a la pestaña Motos para agregar tu inventario.</div>';
+    } else if(list.length===0){
+      html += '<div class="empty"><b>Sin registros aún</b>Agrega el primer mantenimiento con el botón +.</div>';
+    } else {
+      html += '<div class="list">' + list.map(function(mt){
+        var d = daysUntil(mt.proximoVencimiento);
+        var pill = mt.proximoVencimiento ? (d<0?'<span class="pill bad">Vencido</span>':d<=7?'<span class="pill warn">'+d+' d</span>':'<span class="pill ok">'+d+' d</span>') : '';
+        var msg = mt.proximoVencimiento
+          ? ('Recordatorio: la moto '+mt.motoPlaca+' tiene '+mt.tipo+' con vencimiento el '+fmtDate(mt.proximoVencimiento)+'.')
+          : ('Registro de mantenimiento — Moto '+mt.motoPlaca+': '+mt.tipo+' el '+fmtDate(mt.fecha)+(mt.costo?(' ('+fmtMoney(mt.costo)+')'):'')+'.');
+        return '<div class="row-card tap" data-open-mant="'+mt.id+'"><div class="main">'
+          + '<div class="title">'+escapeHtml(mt.motoPlaca)+' · '+escapeHtml(mt.tipo)+'</div>'
+          + '<div class="meta">'+fmtDate(mt.fecha)+(mt.costo?(' · '+fmtMoney(mt.costo)):'')+(mt.proximoVencimiento?(' · vence '+fmtDate(mt.proximoVencimiento)):'')+(mt.notas?(' · '+escapeHtml(mt.notas)):'')+'</div></div>'
+          + (mt.fotoUrl ? '<span class="photo-badge" title="Tiene foto de la factura"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></span>' : '')
+          + pill + waBtn(msg)
+          + '<button class="del" data-del-mant="'+mt.id+'" aria-label="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  function motoFilterStrip(){
+    var html = '<div class="moto-select-strip">';
+    html += '<button data-motofilter="todas" class="'+(state.motoFilter==='todas'?'active':'')+'">Todas</button>';
+    state.motos.forEach(function(m){
+      html += '<button data-motofilter="'+m.id+'" class="'+(state.motoFilter===m.id?'active':'')+'">'+escapeHtml(m.placa)+'</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- GPS ----------
+  function renderGps(){
+    var html = '<div class="banner"><b>Cómo conectar el GPS real:</b> este panel guarda la zona y el horario autorizados por moto, y lleva el registro de alertas. Para que las alertas de salida de zona y horario inusual lleguen solas necesito los datos de tu rastreador (marca/modelo y su plataforma o API — por ejemplo Concox, Coban, Jimi IoT, Whatsgps). Mientras tanto, registra aquí manualmente lo que te avise la app del rastreador.</div>';
+
+    if(state.motos.length===0){
+      html += '<div class="empty"><b>Primero registra una moto</b>Ve a la pestaña Motos para agregar tu inventario.</div>';
+      return html;
+    }
+
+    html += '<div class="section-title">Reglas por moto</div>';
+    html += state.motos.map(function(m){
+      return '<div class="gps-block">'
+        + '<div class="h"><div class="title">'+escapeHtml(m.placa)+(m.marca?(' · '+escapeHtml(m.marca)):'')+'</div>'
+        + '<button class="pill muted" data-editrules="'+m.id+'" style="cursor:pointer;border:none;">Editar</button></div>'
+        + '<div class="gps-mini">'
+        + '<div>Zona autorizada<b>'+escapeHtml(m.zona||'Sin definir')+'</b></div>'
+        + '<div>Horario permitido<b>'+(m.horaInicio&&m.horaFin ? (m.horaInicio+' – '+m.horaFin) : 'Sin definir')+'</b></div>'
+        + '</div></div>';
+    }).join('');
+
+    var alertas = state.alertas.slice().sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+    html += '<div class="section-title">Registro de alertas</div>';
+    if(alertas.length===0){
+      html += '<div class="empty">Sin alertas registradas. Usa el botón + para anotar una salida de zona u horario inusual.</div>';
+    } else {
+      html += '<div class="list">' + alertas.map(function(a){
+        var msg = 'Alerta GPS — '+labelTipoAlerta(a.tipo)+' en la moto '+a.motoPlaca+(a.descripcion?(': '+a.descripcion):'')+' ('+fmtDate(a.fecha)+')';
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(a.motoPlaca)+' · '+labelTipoAlerta(a.tipo)+'</div>'
+          + '<div class="meta">'+fmtDate(a.fecha)+(a.descripcion?(' · '+escapeHtml(a.descripcion)):'')+'</div></div>'
+          + '<button class="pill '+(a.atendida?'ok':'bad')+'" data-toggle-alerta="'+a.id+'" style="cursor:pointer;border:none;">'+(a.atendida?'Atendida':'Pendiente')+'</button>'
+          + waBtn(msg)
+          + '<button class="del" data-del-alerta="'+a.id+'" aria-label="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  // ---------- SUPERVISIÓN (solo dueño) ----------
+  function renderSupervision(){
+    var auto = computeAutoAlerts();
+    var html = '<div class="banner"><b>Solo tú ves esta pestaña.</b> Las alertas automáticas se calculan con los mismos datos que tus encargados registran (no son un secreto en sí). Las notas que agregues aquí como "sospechoso" sí quedan protegidas: ni tus encargados ni nadie con acceso normal al panel puede leerlas.</div>';
+
+    html += '<div class="section-title">Alertas automáticas</div>';
+    if(auto.length===0){
+      html += '<div class="empty">Sin anomalías detectadas por ahora.</div>';
+    } else {
+      html += '<div class="list">' + auto.map(function(a){
+        var msg = a.tipo==='sin_pago'
+          ? ('Hola, tengo pendiente la renta de la moto '+a.motoPlaca+': '+a.mensaje+'. ¿Me confirmas?')
+          : ('Por favor justifica el gasto en la moto '+a.motoPlaca+': '+a.mensaje);
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(a.motoPlaca)+'</div>'
+          + '<div class="meta">'+escapeHtml(a.mensaje)+(a.fecha?(' · '+fmtDate(a.fecha)):'')+'</div></div>'
+          + '<span class="pill bad">Revisar</span>' + waBtn(msg)
+          + (a.movId ? '<button class="flag'+(supervisionDoc(a.movId)?' on':'')+'" data-flag-mov="'+a.movId+'" data-flag-placa="'+escapeHtml(a.motoPlaca)+'" aria-label="Marcar sospechoso"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18M5 4h11l-2 4 2 4H5"/></svg></button>' : '')
+          + '</div>';
+      }).join('') + '</div>';
+    }
+
+    var flagged = state.supervision.slice().sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+    html += '<div class="section-title">Movimientos marcados por ti</div>';
+    if(flagged.length===0){
+      html += '<div class="empty">Aún no has marcado ningún movimiento como sospechoso. Puedes hacerlo desde aquí o desde Finanzas (solo tú ves ese botón).</div>';
+    } else {
+      html += '<div class="list">' + flagged.map(function(f){
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(f.motoPlaca||'General')+'</div>'
+          + '<div class="meta">'+escapeHtml(f.nota||'Sin nota')+' · '+fmtDate(f.fecha)+'</div></div>'
+          + '<button class="del" data-unflag-mov="'+f.id+'" aria-label="Quitar marca"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    return html;
+  }
+
+  function openFlagForm(movId, placa){
+    var existing = supervisionDoc(movId);
+    openSheet(
+      '<h2>Marcar como sospechoso</h2>'
+      + '<div class="owner-only-note">'+escapeHtml(placa||'')+' · esta nota solo la ves tú</div>'
+      + '<div class="field"><label>Motivo / nota privada</label><textarea id="flagNota" placeholder="Ej: el encargado dijo que no cobró ese día">'+escapeHtml(existing?existing.nota:'')+'</textarea></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="saveFlag">Guardar</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        sheet.querySelector('#saveFlag').addEventListener('click', function(){
+          db.collection(negocioPath('supervision')).doc(movId).set({
+            motoPlaca: placa||'', nota: document.getElementById('flagNota').value||'',
+            fecha: todayISO(), updatedAt: Date.now()
+          }).then(closeSheet).catch(showSaveError);
+        });
+      }
+    );
+  }
+
+  // ---------- FAB + sheets ----------
+  function renderFab(){
+    var old = document.querySelector('.fab');
+    if(old) old.remove();
+    if(state.tab==='resumen') return;
+    var b = document.createElement('button');
+    b.className='fab'; b.setAttribute('aria-label','Agregar');
+    b.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+    b.addEventListener('click', function(){
+      if(state.tab==='finanzas') openMovForm();
+      else if(state.tab==='motos') openMotoForm();
+      else if(state.tab==='mantenimiento') openMantForm();
+      else if(state.tab==='gps') openAlertaForm();
+    });
+    document.getElementById('app').appendChild(b);
+  }
+
+  // Campo reutilizable de "foto del recibo" para los formularios de gasto y
+  // mantenimiento: muestra la miniatura si ya hay una, permite reemplazarla o
+  // quitarla, y comprime cualquier foto nueva antes de guardarla.
+  function renderPhotoField(id, existingUrl){
+    return '<div class="field"><label>Foto del recibo o factura (opcional)</label>'
+      + '<input type="file" accept="image/*" capture="environment" id="'+id+'Input">'
+      + '<div class="field-error" id="'+id+'Err" hidden></div>'
+      + '<div id="'+id+'Preview">'+(existingUrl?photoPreviewHtml(id,existingUrl):'')+'</div>'
+      + '</div>';
+  }
+  function photoPreviewHtml(id, url){
+    return '<div class="photo-preview"><img src="'+url+'" alt="Foto del recibo"><button type="button" class="btn ghost" id="'+id+'Remove">Quitar foto</button></div>';
+  }
+  function wirePhotoField(sheet, id, initialUrl){
+    var current = initialUrl || null;
+    var input = sheet.querySelector('#'+id+'Input');
+    var err = sheet.querySelector('#'+id+'Err');
+    var preview = sheet.querySelector('#'+id+'Preview');
+    function renderPreview(){
+      preview.innerHTML = current ? photoPreviewHtml(id, current) : '';
+      var rmBtn = preview.querySelector('#'+id+'Remove');
+      if(rmBtn) rmBtn.addEventListener('click', function(){ current=null; input.value=''; renderPreview(); });
+    }
+    renderPreview();
+    input.addEventListener('change', function(){
+      var file = input.files && input.files[0];
+      if(!file) return;
+      err.hidden = true;
+      compressImageToDataURL(file, 150000, function(url, error){
+        if(error){ err.textContent = error; err.hidden = false; return; }
+        current = url; renderPreview();
+      });
+    });
+    return { get: function(){ return current; } };
+  }
+
+  function openImageLightbox(url){
+    if(!url) return;
+    openSheet(
+      '<h2>Foto del recibo</h2>'
+      + '<img src="'+url+'" style="width:100%; border-radius:10px; display:block;" alt="Foto del recibo">'
+      + '<div class="sheet-actions" style="margin-top:14px;"><button class="btn ghost" id="cancelSheet">Cerrar</button></div>',
+      function(sheet){ sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet); }
+    );
+  }
+
+  function openSheet(innerHtml, onMount){
+    closeSheet();
+    var back = document.createElement('div');
+    back.className='sheet-backdrop'; back.id='sheetBackdrop';
+    back.addEventListener('click', function(e){ if(e.target===back) closeSheet(); });
+    var sheet = document.createElement('div');
+    sheet.className='sheet';
+    sheet.innerHTML = innerHtml;
+    back.appendChild(sheet);
+    document.body.appendChild(back);
+    if(onMount) onMount(sheet);
+  }
+  function closeSheet(){
+    var b = document.getElementById('sheetBackdrop');
+    if(b) b.remove();
+  }
+
+  function openMovForm(existing){
+    var tipo = existing ? existing.tipo : 'gasto';
+    // El formulario queda amarrado a UNA cuenta: la del movimiento que se edita,
+    // o la que está seleccionada arriba en Finanzas. Solo aparecen motos de esa
+    // cuenta, así que no hay forma de cargarle algo a la otra por error.
+    var cuentaForm = existing ? cuentaDeMov(existing) : (state.cuenta || '');
+    var motoOpts = '<option value="">Sin moto (gasto general de '+escapeHtml(nombreCuenta(cuentaForm))+')</option>' + motoOptionsHtml(existing?existing.motoId:null, cuentaForm);
+    openSheet(
+      '<h2>'+(existing?'Editar movimiento':'Nuevo movimiento')+'</h2>'
+      + cuentaBanner(cuentaForm)
+      + '<div class="seg" id="segTipo"><button type="button" class="'+(tipo==='gasto'?'active':'')+'" data-v="gasto">Gasto</button><button type="button" class="'+(tipo==='ingreso'?'active':'')+'" data-v="ingreso">Ingreso</button></div>'
+      + '<div class="field" style="margin-top:12px"><label>Monto (COP)</label><input type="text" inputmode="numeric" id="fMonto" placeholder="0" value="'+(existing?existing.monto:'')+'"><div class="field-error" id="fMontoErr" hidden>Ingresa un monto mayor a cero.</div></div>'
+      + '<div class="field"><label>Categoría</label><select id="fCategoria"></select><div class="hint" id="fCatHint" hidden></div></div>'
+      + '<div class="field"><label>Moto (opcional)</label><select id="fMoto">'+motoOpts+'</select>'
+      + (cuentasTerceros().length && !existing ? '<div class="owner-only-note" style="margin:4px 0 0;">Para registrar en la otra cuenta, cierra esto y cámbiala arriba en Finanzas.</div>' : '')
+      + '</div>'
+      + '<div class="field"><label>Fecha</label><input type="date" id="fFecha" value="'+(existing?existing.fecha:todayISO())+'"><div class="hint" id="fFechaHint" hidden></div></div>'
+      + '<div class="field"><label>Nota (opcional)</label><textarea id="fNota" placeholder="Detalle breve">'+(existing?escapeHtml(existing.nota||''):'')+'</textarea></div>'
+      + renderPhotoField('fFoto', existing?existing.fotoUrl:null)
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="saveMov">Guardar</button></div>',
+      function(sheet){
+        var photoField = wirePhotoField(sheet, 'fFoto', existing?existing.fotoUrl:null);
+        function catOpts(){
+          var cats = tipo==='ingreso' ? ['Renta','Depósito','Otro ingreso'] : ['Mantenimiento','Combustible','Seguros (SOAT/todo riesgo)','Repuestos','Administrativo','Otro gasto'];
+          document.getElementById('fCategoria').innerHTML = cats.map(function(c){return '<option'+(existing&&existing.categoria===c?' selected':'')+'>'+c+'</option>';}).join('');
+          catHint();
+        }
+        function catHint(){
+          var c = document.getElementById('fCategoria').value, h = document.getElementById('fCatHint');
+          var msg = '';
+          if(tipo==='gasto' && (c==='Mantenimiento' || c==='Repuestos')) msg = 'Si ya lo anotaste en la pestaña Mantenimiento, no lo registres aquí: se descontaría dos veces.';
+          else if(tipo==='gasto' && c==='Administrativo') msg = 'Si es el pago de nómina, no lo registres: ya se apartaron '+fmtMoney(ADMIN_DIARIO)+' de cada renta.';
+          h.textContent = msg; h.hidden = !msg;
+        }
+        document.getElementById('fCategoria').addEventListener('change', catHint);
+        function fechaHint(){
+          var f = document.getElementById('fFecha').value, h = document.getElementById('fFechaHint'), hoy = todayISO();
+          var msg = '';
+          if(f && f>hoy) msg = 'Esta fecha es futura. El movimiento contará en el mes de esa fecha, no en el de hoy.';
+          else if(f && monthKey(f)!==monthKey(hoy)) msg = 'Este movimiento contará en '+new Date(f+'T12:00:00').toLocaleDateString('es-CO',{month:'long',year:'numeric'})+', no en el mes actual.';
+          h.textContent = msg; h.hidden = !msg;
+        }
+        document.getElementById('fFecha').addEventListener('input', fechaHint);
+        fechaHint();
+        catOpts();
+        sheet.querySelectorAll('#segTipo button').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            sheet.querySelectorAll('#segTipo button').forEach(function(x){x.classList.remove('active');});
+            btn.classList.add('active'); tipo = btn.getAttribute('data-v'); catOpts();
+          });
+        });
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        sheet.querySelector('#saveMov').addEventListener('click', function(){
+          var monto = parseMoney(document.getElementById('fMonto').value);
+          if(!monto || monto<=0){
+            document.getElementById('fMonto').focus();
+            document.getElementById('fMontoErr').hidden = false;
+            return;
+          }
+          document.getElementById('fMontoErr').hidden = true;
+          var motoId = document.getElementById('fMoto').value;
+          var moto = motoId ? motoById(motoId) : null;
+          if(moto && cuentaDeMoto(moto)!==cuentaForm){ showToast('Esa moto es de otra cuenta. No se guardó nada.', true); return; }
+          var data = {
+            tipo: tipo, monto: monto, categoria: document.getElementById('fCategoria').value,
+            motoId: motoId||null, motoPlaca: moto?moto.placa:null,
+            fecha: document.getElementById('fFecha').value||todayISO(),
+            nota: document.getElementById('fNota').value||'',
+            fotoUrl: photoField.get()||null,
+            cuenta: cuentaForm
+          };
+          if(existing){
+            db.doc(negocioPath('movimientos')+'/'+existing.id).update(data).then(closeSheet).catch(showSaveError);
+          } else {
+            data.createdAt = Date.now();
+            var guardarMov = function(){ db.collection(negocioPath('movimientos')).add(data).then(closeSheet).catch(showSaveError); };
+            var dupMant = data.tipo==='gasto' && data.motoId && state.mantenimientos.find(function(mt){
+              return mt.motoId===data.motoId && Number(mt.costo||0)===data.monto && monthKey(mt.fecha)===monthKey(data.fecha);
+            });
+            if(dupMant){
+              askConfirm('¿Ya está registrado?',
+                'En Mantenimiento ya hay "'+escapeHtml(dupMant.tipo)+'" de <b>'+fmtMoney(dupMant.costo)+'</b> para '+escapeHtml(data.motoPlaca||'')+' ('+fmtDate(dupMant.fecha)+'). Si es el mismo gasto, guardarlo aquí lo descontaría dos veces.',
+                'Guardar de todos modos', guardarMov);
+            } else guardarMov();
+          }
+        });
+      }
+    );
+  }
+
+  function openMotoForm(existing){
+    var m = existing || {};
+    var opts = ['disponible','rentada','mantenimiento'].map(function(v){
+      var label = v==='disponible'?'Disponible':v==='rentada'?'Rentada':'En mantenimiento';
+      return '<option value="'+v+'"'+(m.estado===v?' selected':'')+'>'+label+'</option>';
+    }).join('');
+    openSheet(
+      '<h2>'+(existing?'Editar moto':'Nueva moto')+'</h2>'
+      + '<div class="two-col"><div class="field"><label>Placa</label><input id="mPlaca" placeholder="EJA12B" value="'+escapeHtml(m.placa||'')+'"></div>'
+      + '<div class="field"><label>Año</label><input id="mAnio" type="number" placeholder="2024" value="'+escapeHtml(m.anio||'')+'"></div></div>'
+      + '<div class="two-col"><div class="field"><label>Marca</label><input id="mMarca" placeholder="AKT, Yamaha..." value="'+escapeHtml(m.marca||'')+'"></div>'
+      + '<div class="field"><label>Modelo</label><input id="mModelo" placeholder="NKD 125" value="'+escapeHtml(m.modelo||'')+'"></div></div>'
+      + '<div class="field"><label>Valor de compra (COP)</label><input id="mCompra" type="text" inputmode="numeric" placeholder="7500000" value="'+(m.valorCompra||'')+'"></div>'
+      + '<div class="two-col"><div class="field"><label>Tarifa diaria de renta (COP)</label><input id="mTarifa" type="text" inputmode="numeric" placeholder="60000" value="'+(m.tarifaDiaria||'')+'"></div>'
+      + '<div class="field"><label>Kilometraje</label><input id="mKm" type="number" placeholder="0" value="'+(m.kilometraje||'')+'"></div></div>'
+      + (function(){
+          var actual = cuentaDeMoto(m);
+          if(existing && motoTieneRegistros(existing.id)){
+            return '<div class="field"><label>¿De quién es la moto?</label>'
+              + '<input value="'+escapeHtml(nombreCuenta(actual))+(actual?' (cuenta aparte)':'')+'" disabled>'
+              + '<input type="hidden" id="mProp" value="'+escapeHtml(actual)+'"><input id="mPropOtro" hidden>'
+              + '<div class="owner-only-note" style="margin:4px 0 0;">Bloqueado: esta moto ya tiene pagos o gastos registrados. Cambiarle el propietario movería toda su historia a la otra cuenta. Si de verdad cambió de dueño, regístrala como una moto nueva.</div><div id="mPropHint" hidden></div></div>';
+          }
+          var ops = [''].concat(cuentasTerceros());
+          if(ops.indexOf('Administrador')<0) ops.push('Administrador');
+          if(actual && ops.indexOf(actual)<0) ops.push(actual);
+          return '<div class="field"><label for="mProp">¿De quién es la moto?</label><select id="mProp">'
+            + ops.map(function(c){ return '<option value="'+escapeHtml(c)+'"'+(c===actual?' selected':'')+'>'+escapeHtml(nombreCuenta(c))+(c?' (cuenta aparte)':'')+'</option>'; }).join('')
+            + '<option value="__otro">Otro propietario…</option></select>'
+            + '<input id="mPropOtro" placeholder="Nombre del propietario" style="margin-top:6px;" hidden>'
+            + '<div class="hint" id="mPropHint"'+(actual?'':' hidden')+'>Cuenta aparte: sus pagos, gastos y depósito no se suman a RZ Rentas, y no se aparta nómina.</div></div>';
+        })()
+      + '<div class="field"><label>Estado</label><select id="mEstado">'+opts+'</select></div>'
+      + '<div class="field"><label>Fecha de inicio de renta actual (opcional)</label><input id="mInicioRenta" type="date" value="'+(m.fechaInicioRenta||'')+'"></div>'
+      + '<div class="owner-only-note" style="margin-top:-6px;">Si la marcas "Rentada" y defines esta fecha, el calendario de esa moto marca en rojo cada día sin pago desde entonces.</div>'
+      + '<div class="section-title" style="margin-top:8px;">Datos de quien la tiene rentada</div>'
+      + '<div class="field"><label>Nombre completo</label><input id="mArrNombre" placeholder="Nombre del arrendatario" value="'+escapeHtml(m.arrendatarioNombre||'')+'"></div>'
+      + '<div class="two-col"><div class="field"><label>N° de documento</label><input id="mArrDoc" placeholder="C.C. 1234567890" value="'+escapeHtml(m.arrendatarioDocumento||'')+'"></div>'
+      + '<div class="field"><label>Teléfono (WhatsApp)</label><input id="mArrTel" type="tel" placeholder="3001234567" value="'+escapeHtml(m.arrendatarioTelefono||'')+'"></div></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="saveMoto">Guardar</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        var propSel = sheet.querySelector('#mProp');
+        propSel.addEventListener('change', function(){
+          sheet.querySelector('#mPropOtro').hidden = propSel.value!=='__otro';
+          sheet.querySelector('#mPropHint').hidden = !propSel.value;
+        });
+        sheet.querySelector('#saveMoto').addEventListener('click', function(){
+          var placa = document.getElementById('mPlaca').value.trim().toUpperCase();
+          var propietario = propSel.value==='__otro' ? sheet.querySelector('#mPropOtro').value.trim() : propSel.value;
+          if(propSel.value==='__otro' && !propietario){ sheet.querySelector('#mPropOtro').focus(); return; }
+          if(!placa){ document.getElementById('mPlaca').focus(); return; }
+          var nuevoEstado = document.getElementById('mEstado').value;
+          var inicioRenta = document.getElementById('mInicioRenta').value||null;
+          if(nuevoEstado==='rentada' && !inicioRenta && (!existing || existing.estado!=='rentada')){
+            inicioRenta = todayISO(); // conveniencia: si recién se marca como rentada, arranca el calendario hoy
+          }
+          if(nuevoEstado!=='rentada') inicioRenta = null;
+          var data = {
+            placa: placa, anio: document.getElementById('mAnio').value||null,
+            marca: document.getElementById('mMarca').value||'', modelo: document.getElementById('mModelo').value||'',
+            valorCompra: parseMoney(document.getElementById('mCompra').value),
+            tarifaDiaria: parseMoney(document.getElementById('mTarifa').value),
+            kilometraje: Number(document.getElementById('mKm').value)||0,
+            estado: nuevoEstado, fechaInicioRenta: inicioRenta, propietario: propietario || '',
+            arrendatarioNombre: document.getElementById('mArrNombre').value||'',
+            arrendatarioDocumento: document.getElementById('mArrDoc').value||'',
+            arrendatarioTelefono: document.getElementById('mArrTel').value||''
+          };
+          if(existing){
+            var dep = depositoMoto(existing.id);
+            if(existing.estado==='rentada' && nuevoEstado==='disponible' && dep.total>0){
+              openLiquidarDeposito(existing, data, dep);
+              return;
+            }
+            if(existing.estado==='rentada' && nuevoEstado==='disponible') data.depositoCorte = Date.now();
+            db.doc(negocioPath('motos')+'/'+existing.id).update(data).then(closeSheet).catch(showSaveError);
+          } else {
+            data.createdAt = Date.now();
+            db.collection(negocioPath('motos')).add(data).then(closeSheet).catch(showSaveError);
+          }
+        });
+      }
+    );
+  }
+
+  // Al terminar una renta: muestra el depósito acumulado, pregunta cuánto se
+  // devuelve y deja todo anotado. Lo retenido entra como ingreso de la moto.
+  function openLiquidarDeposito(moto, motoData, dep){
+    var arr = moto.arrendatarioNombre || 'el arrendatario';
+    openSheet(
+      '<h2>Liquidar depósito</h2>'
+      + '<div class="owner-only-note">'+escapeHtml(moto.placa)+' pasa a Disponible. Antes, define cuánto del depósito se le devuelve a '+escapeHtml(arr)+'.</div>'
+      + '<div class="stat-list">'
+      + statRow('Días pagados en esta renta', dep.dias+' día(s)')
+      + statRowTotal('Depósito acumulado', fmtMoney(dep.total), 'pos')
+      + '</div>'
+      + '<div class="field"><label for="ldDevuelve">Valor que se devuelve (COP)</label><input id="ldDevuelve" type="text" inputmode="numeric" value="'+dep.total+'"></div>'
+      + '<div class="field" id="ldMotivoWrap" hidden><label for="ldMotivo">¿Por qué se retiene una parte?</label><input id="ldMotivo" placeholder="Ej. daño en el espejo, días sin pagar"></div>'
+      + '<div class="hint" id="ldResumen"></div>'
+      + '<div class="field-error" id="ldErr" hidden></div>'
+      + '<div class="sheet-actions" style="margin-top:12px;"><button class="btn ghost" id="cancelSheet">Volver</button><button class="btn primary" id="ldSave">Liquidar y liberar moto</button></div>',
+      function(sheet){
+        var inp = sheet.querySelector('#ldDevuelve');
+        function upd(){
+          var dev = parseMoney(inp.value);
+          var ret = dep.total - dev;
+          var res = sheet.querySelector('#ldResumen');
+          sheet.querySelector('#ldMotivoWrap').hidden = !(ret>0);
+          if(dev>dep.total){ res.textContent = 'No puedes devolver más de lo acumulado ('+fmtMoney(dep.total)+').'; return; }
+          res.textContent = ret>0
+            ? 'Se devuelven '+fmtMoney(dev)+' y se retienen '+fmtMoney(ret)+'. Lo retenido entra como ingreso de esta moto.'
+            : 'Se devuelve todo el depósito ('+fmtMoney(dev)+'). No cambia tu saldo.';
+        }
+        inp.addEventListener('input', upd); upd();
+        sheet.querySelector('#cancelSheet').addEventListener('click', function(){ openMotoForm(moto); });
+        sheet.querySelector('#ldSave').addEventListener('click', function(){
+          var err = sheet.querySelector('#ldErr');
+          var dev = parseMoney(inp.value);
+          if(inp.value.trim()==='') dev = 0;
+          if(dev>dep.total){ err.textContent='El valor a devolver no puede ser mayor que '+fmtMoney(dep.total)+'.'; err.hidden=false; return; }
+          var ret = dep.total - dev;
+          var motivo = (sheet.querySelector('#ldMotivo').value||'').trim();
+          if(ret>0 && !motivo){ err.textContent='Escribe por qué se retiene una parte, para que quede anotado.'; err.hidden=false; return; }
+          var now = Date.now(), hoy = todayISO();
+          var batch = db.batch();
+          batch.update(db.doc(negocioPath('motos')+'/'+moto.id), Object.assign({}, motoData, { depositoCorte: now }));
+          batch.set(db.collection(negocioPath('movimientos')).doc(), {
+            tipo:'deposito_liq', motoId:moto.id, motoPlaca:moto.placa, fecha:hoy, createdAt:now, cuenta: cuentaDeMoto(moto),
+            monto: dev, retenido: ret, acumulado: dep.total, dias: dep.dias,
+            arrendatarioNombre: moto.arrendatarioNombre||'', categoria:'Liquidación de depósito', nota: motivo
+          });
+          if(ret>0){
+            batch.set(db.collection(negocioPath('movimientos')).doc(), {
+              tipo:'ingreso', motoId:moto.id, motoPlaca:moto.placa, fecha:hoy, createdAt:now, cuenta: cuentaDeMoto(moto),
+              monto: ret, categoria:'Depósito retenido', nota: motivo+(moto.arrendatarioNombre?(' · '+moto.arrendatarioNombre):''), fotoUrl:null
+            });
+          }
+          var btn = sheet.querySelector('#ldSave'); btn.disabled = true;
+          batch.commit().then(function(){
+            closeSheet();
+            showToast(ret>0 ? ('Depósito liquidado: se devuelven '+fmtMoney(dev)+', se retienen '+fmtMoney(ret)+'.') : ('Depósito liquidado: se devuelven '+fmtMoney(dev)+'.'));
+          }).catch(function(e){ btn.disabled=false; showSaveError(e); });
+        });
+      }
+    );
+  }
+
+  // Para rentas que empezaron antes de existir el depósito: pasa al depósito
+  // los $5.000 de esos días. Como esos días ya se contaron como ingreso, se
+  // registra un gasto "Traslado a depósito" por el mismo valor para no inflar el saldo.
+  function openAjusteDeposito(m){
+    var dias = diasSinDeposito(m);
+    if(!dias.length) return;
+    var monto = dias.length * DEPOSITO_DIARIO;
+    askConfirm('Pasar días anteriores al depósito',
+      escapeHtml(m.placa)+' tiene <b>'+dias.length+' día(s) pagados</b> en esta renta que se registraron antes del depósito. '
+      + 'Se pasan <b>'+fmtMoney(monto)+'</b> al depósito ('+fmtMoney(DEPOSITO_DIARIO)+' por día).<br><br>'
+      + 'Como esos días ya se contaron como ingreso, se anota un gasto "Traslado a depósito" de '+fmtMoney(monto)+' con fecha de hoy, para que tu saldo no cuente esa plata dos veces.',
+      'Pasar al depósito', function(){
+        var now = Date.now(), hoy = todayISO();
+        var batch = db.batch();
+        dias.forEach(function(r){
+          batch.set(db.collection(negocioPath('movimientos')).doc(), { tipo:'deposito', motoId:m.id, motoPlaca:m.placa, fecha:r.fecha, createdAt:r.createdAt, cuenta: cuentaDeMoto(m),
+            monto: DEPOSITO_DIARIO, categoria:'Depósito reembolsable', nota:'Pasado al depósito después (renta registrada antes del cambio)' });
+        });
+        batch.set(db.collection(negocioPath('movimientos')).doc(), { tipo:'gasto', motoId:m.id, motoPlaca:m.placa, fecha:hoy, createdAt:now, cuenta: cuentaDeMoto(m),
+          monto: monto, categoria:'Traslado a depósito', nota: dias.length+' día(s) de la renta actual pasados al depósito reembolsable', fotoUrl:null });
+        batch.commit().then(function(){ showToast(fmtMoney(monto)+' pasados al depósito de '+m.placa+'.'); setTimeout(function(){ openMotoDetail(m.id, true); }, 350); }).catch(showSaveError);
+      }, function(){ openMotoDetail(m.id, true); });
+  }
+
+  function openMotoDetail(motoId, keepCalMonth){
+    var m = motoById(motoId); if(!m) return;
+    if(!keepCalMonth) calMonth = currentMonth;
+    var st = computeMotoStats(motoId);
+    var recentMovs = st.movs.filter(function(mv){ return mv.tipo==='ingreso' || mv.tipo==='gasto'; }).sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');}).slice(0,10);
+    var html = '<h2>'+escapeHtml(motoLabel(m))+'</h2>';
+    if(cuentaDeMoto(m)) html += '<div class="banner">Moto de <b>'+escapeHtml(cuentaDeMoto(m))+'</b> · cuenta aparte. Sus pagos y gastos no se suman a RZ Rentas y no aparta nómina.</div>';
+    html += '<div class="stat-list">'
+      + statRow('Valor de compra', fmtMoney(st.compra))
+      + statRow('Total recibido en renta', fmtMoney(st.ingresos), 'pos')
+      + statRow('Gastos asociados (incl. mantenimiento)', fmtMoney(st.gastos), 'neg')
+      + statRowTotal('Balance neto de esta moto', fmtMoney(st.balance), st.balance>=0?'pos':'neg')
+      + (st.compra>0 ? statRow('Recuperación de la inversión', st.recuperado+'% ('+fmtMoney(st.compra-st.balance>0?st.compra-st.balance:0)+' por recuperar)') : '')
+      + '</div>';
+    var dp = depositoMoto(motoId);
+    var liqs = liquidacionesMoto(motoId);
+    var sinDep = isOwnerView ? diasSinDeposito(m) : [];
+    html += '<div class="section-title" style="margin-top:18px;">Depósito reembolsable</div>';
+    html += '<div class="stat-list">'
+      + statRowTotal('Acumulado en esta renta', fmtMoney(dp.total), 'pos')
+      + statRow('Días pagados que suman depósito', dp.dias+' día(s) × '+fmtMoney(DEPOSITO_DIARIO))
+      + '</div>';
+    html += '<div class="owner-only-note" style="margin-top:-6px;">Se devuelve al terminar la renta. Cuando pases la moto a "Disponible", la app te pide cuánto devolver y el acumulado vuelve a $0.</div>';
+    if(sinDep.length){
+      html += '<div class="warn-box"><b>'+sinDep.length+' día(s) de esta renta no tienen depósito</b>Se registraron antes de este cambio. <button class="pill muted" id="ajusteDep" style="cursor:pointer;border:none;margin-top:6px;">Pasar '+fmtMoney(sinDep.length*DEPOSITO_DIARIO)+' al depósito</button></div>';
+    }
+    if(liqs.length){
+      html += '<div class="list" style="margin-bottom:10px;">' + liqs.slice(0,5).map(function(l){
+        return '<div class="row-card"><div class="main"><div class="title">Liquidación '+fmtDate(l.fecha)+'</div>'
+          + '<div class="meta">'+(l.arrendatarioNombre?escapeHtml(l.arrendatarioNombre)+' · ':'')+(l.dias||0)+' día(s) · acumulado '+fmtMoney(l.acumulado)
+          + (Number(l.retenido)>0?(' · retenido '+fmtMoney(l.retenido)+(l.nota?(' ('+escapeHtml(l.nota)+')'):'')):'')+'</div></div>'
+          + '<div class="amount">Devuelto '+fmtMoney(l.monto)+'</div></div>';
+      }).join('') + '</div>';
+    }
+    if(m.arrendatarioNombre || m.arrendatarioTelefono || m.arrendatarioDocumento){
+      var arrWa = waHrefTo(m.arrendatarioTelefono, 'Hola '+(m.arrendatarioNombre||'')+', te escribo de RZ Rentas sobre la moto '+m.placa+'.');
+      html += '<div class="section-title" style="margin-top:18px;">Arrendatario actual</div>';
+      html += '<div class="stat-list">'
+        + (m.arrendatarioNombre ? statRow('Nombre', escapeHtml(m.arrendatarioNombre)) : '')
+        + (m.arrendatarioDocumento ? statRow('Documento', escapeHtml(m.arrendatarioDocumento)) : '')
+        + (m.arrendatarioTelefono ? statRow('Teléfono', escapeHtml(m.arrendatarioTelefono)) : '')
+        + '</div>';
+      if(arrWa){
+        html += '<div class="sheet-actions" style="margin-top:6px;"><a class="btn primary" href="'+arrWa+'" target="_blank" rel="noopener" style="text-decoration:none; text-align:center;">Escribirle por WhatsApp</a></div>';
+      }
+    }
+    html += '<div class="sheet-actions">'
+      + '<button class="btn ghost" id="editMotoBtn">Editar moto</button>'
+      + '<button class="btn primary" id="quickRenta">+ Renta de hoy</button>'
+      + '</div>';
+    html += '<div id="calWrap">'+renderMotoCalendar(motoId)+'</div>';
+    html += '<div class="section-title" style="margin-top:20px;">Últimos movimientos de esta moto</div>';
+    if(recentMovs.length===0){
+      html += '<div class="empty">Sin movimientos registrados aún para esta moto.</div>';
+    } else {
+      html += '<div class="list">' + recentMovs.map(function(mv){
+        return '<div class="row-card"><div class="main">'
+          + '<div class="title">'+escapeHtml(mv.categoria||(mv.tipo==='ingreso'?'Ingreso':'Gasto'))+'</div>'
+          + '<div class="meta">'+fmtDate(mv.fecha)+(mv.nota?(' · '+escapeHtml(mv.nota)):'')+'</div></div>'
+          + '<div class="amount '+(mv.tipo==='ingreso'?'pos':'neg')+'">'+(mv.tipo==='ingreso'?'+':'-')+fmtMoney(mv.monto)+'</div>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    html += '<div class="sheet-actions" style="margin-top:16px;"><button class="btn ghost" id="cancelSheet">Cerrar</button></div>';
+    openSheet(html, function(sheet){
+      sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+      sheet.querySelector('#editMotoBtn').addEventListener('click', function(){ openMotoForm(m); });
+      sheet.querySelector('#quickRenta').addEventListener('click', function(){
+        registrarPagoRenta(m, todayISO(), '', closeSheet);
+      });
+      wireCalendar(sheet, m);
+      var aj = sheet.querySelector('#ajusteDep');
+      if(aj) aj.addEventListener('click', function(){ openAjusteDeposito(m); });
+    });
+  }
+  // Conecta los botones del calendario. Al cambiar de mes solo se redibuja el
+  // calendario (no toda la hoja), así no se pierde la posición en pantalla.
+  function wireCalendar(sheet, m){
+    var wrap = sheet.querySelector('#calWrap'); if(!wrap) return;
+    wrap.querySelectorAll('[data-cal-month]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var next = shiftMonth(calMonth||currentMonth, Number(b.getAttribute('data-cal-month')));
+        if(next>currentMonth) return;
+        calMonth = next;
+        wrap.innerHTML = renderMotoCalendar(m.id);
+        wireCalendar(sheet, m);
+      });
+    });
+    wrap.querySelectorAll('[data-cal-pay]').forEach(function(cell){
+      cell.addEventListener('click', function(){
+        var iso = cell.getAttribute('data-cal-pay');
+        askConfirm('Registrar pago atrasado',
+          '¿Registrar la renta de <b>'+escapeHtml(m.placa)+'</b> del '+fmtDate(iso)+' por <b>'+fmtMoney(m.tarifaDiaria)+'</b>?',
+          'Registrar pago', function(){
+            registrarPagoRenta(m, iso, 'Pago atrasado registrado desde el calendario', function(){
+              showToast('Pago del '+fmtDate(iso)+' registrado.');
+              openMotoDetail(m.id, true);
+            });
+          }, function(){ openMotoDetail(m.id, true); });
+      });
+    });
+    wrap.querySelectorAll('[data-cal-info]').forEach(function(cell){
+      cell.addEventListener('click', function(){
+        var row = wrap.querySelector('#pago-'+cell.getAttribute('data-cal-info'));
+        if(row){
+          row.scrollIntoView({behavior:'smooth', block:'center'});
+          row.style.boxShadow = '0 0 0 2px var(--success) inset';
+          setTimeout(function(){ row.style.boxShadow=''; }, 1600);
+        }
+      });
+    });
+  }
+  function statRow(label, value, cls){
+    return '<div class="stat-row"><div class="k">'+label+'</div><div class="v '+(cls||'')+'">'+value+'</div></div>';
+  }
+  function statRowTotal(label, value, cls){
+    return '<div class="stat-row total"><div class="k">'+label+'</div><div class="v '+(cls||'')+'">'+value+'</div></div>';
+  }
+
+  function openMantForm(existing){
+    if(state.motos.length===0) return;
+    var cuentaMant = existing ? cuentaDeMant(existing) : undefined;
+    var motoOpts = motoOptionsHtml(existing?existing.motoId:null, cuentaMant);
+    var tipos = ['Cambio de aceite','Llantas','Frenos','SOAT','Revisión técnico-mecánica','Revisión general','Otro'];
+    var tipoOpts = tipos.map(function(t){return '<option'+(existing&&existing.tipo===t?' selected':'')+'>'+t+'</option>';}).join('');
+    openSheet(
+      '<h2>'+(existing?'Detalle de mantenimiento':'Nuevo mantenimiento')+'</h2>'
+      + '<div class="field"><label>Moto</label><select id="tMoto">'+motoOpts+'</select><div class="hint" id="tCuentaHint" hidden></div></div>'
+      + '<div class="field"><label>Tipo</label><select id="tTipo">'+tipoOpts+'</select></div>'
+      + '<div class="two-col"><div class="field"><label>Fecha</label><input type="date" id="tFecha" value="'+(existing?existing.fecha:todayISO())+'"></div>'
+      + '<div class="field"><label>Costo (COP)</label><input type="text" inputmode="numeric" id="tCosto" placeholder="0" value="'+(existing&&existing.costo?existing.costo:'')+'"></div></div>'
+      + '<div class="field"><label>Próximo vencimiento (opcional)</label><input type="date" id="tVence" value="'+(existing&&existing.proximoVencimiento?existing.proximoVencimiento:'')+'"></div>'
+      + '<div class="field"><label>Notas</label><textarea id="tNotas">'+(existing?escapeHtml(existing.notas||''):'')+'</textarea></div>'
+      + renderPhotoField('tFoto', existing?existing.fotoUrl:null)
+      + '<div class="sheet-actions">'
+      + (existing ? '<button class="btn ghost" id="delMantDetail" style="color:var(--danger);">Eliminar</button>' : '<button class="btn ghost" id="cancelSheet">Cancelar</button>')
+      + '<button class="btn primary" id="saveMant">Guardar</button></div>',
+      function(sheet){
+        var photoField = wirePhotoField(sheet, 'tFoto', existing?existing.fotoUrl:null);
+        function mantHint(){
+          var h = sheet.querySelector('#tCuentaHint');
+          if(!cuentasTerceros().length){ h.hidden = true; return; }
+          var c = cuentaDeMotoId(sheet.querySelector('#tMoto').value);
+          h.textContent = 'Este costo se carga a la cuenta de '+nombreCuenta(c)+'.';
+          h.hidden = false;
+        }
+        sheet.querySelector('#tMoto').addEventListener('change', mantHint); mantHint();
+        var cancelBtn = sheet.querySelector('#cancelSheet');
+        if(cancelBtn) cancelBtn.addEventListener('click', closeSheet);
+        var delBtn = sheet.querySelector('#delMantDetail');
+        if(delBtn) delBtn.addEventListener('click', function(){
+          db.doc(negocioPath('mantenimientos')+'/'+existing.id).delete().then(closeSheet).catch(showSaveError);
+        });
+        sheet.querySelector('#saveMant').addEventListener('click', function(){
+          var motoId = document.getElementById('tMoto').value;
+          var moto = motoById(motoId);
+          if(!moto){ showToast('Elige la moto.', true); return; }
+          if(existing && cuentaDeMoto(moto)!==cuentaMant){ showToast('No se puede pasar un mantenimiento a una moto de otra cuenta.', true); return; }
+          var data = {
+            motoId: motoId, motoPlaca: moto?moto.placa:'', tipo: document.getElementById('tTipo').value,
+            fecha: document.getElementById('tFecha').value||todayISO(),
+            costo: parseMoney(document.getElementById('tCosto').value),
+            proximoVencimiento: document.getElementById('tVence').value||null,
+            notas: document.getElementById('tNotas').value||'',
+            fotoUrl: photoField.get()||null,
+            cuenta: cuentaDeMoto(moto)
+          };
+          if(existing){
+            db.doc(negocioPath('mantenimientos')+'/'+existing.id).update(data).then(closeSheet).catch(showSaveError);
+          } else {
+            data.createdAt = Date.now();
+            var dup = data.costo>0 && state.movimientos.find(function(mv){
+              return mv.tipo==='gasto' && mv.motoId===data.motoId && Number(mv.monto||0)===data.costo && monthKey(mv.fecha)===monthKey(data.fecha);
+            });
+            var guardar = function(){ db.collection(negocioPath('mantenimientos')).add(data).then(closeSheet).catch(showSaveError); };
+            if(dup){
+              askConfirm('¿Ya está registrado?',
+                'En Finanzas ya hay un gasto de <b>'+fmtMoney(dup.monto)+'</b> para '+escapeHtml(data.motoPlaca)+' ('+escapeHtml(dup.categoria||'Gasto')+', '+fmtDate(dup.fecha)+'). Si es el mismo, guardarlo aquí lo descontaría dos veces.',
+                'Guardar de todos modos', guardar);
+            } else guardar();
+          }
+        });
+      }
+    );
+  }
+
+  function openAlertaForm(){
+    if(state.motos.length===0) return;
+    var motoOpts = state.motos.map(function(m){return '<option value="'+m.id+'">'+escapeHtml(motoLabel(m))+'</option>';}).join('');
+    openSheet(
+      '<h2>Registrar alerta</h2>'
+      + '<div class="field"><label>Moto</label><select id="aMoto">'+motoOpts+'</select></div>'
+      + '<div class="field"><label>Tipo</label><select id="aTipo"><option value="zona">Salida de zona</option><option value="horario">Horario inusual</option><option value="otro">Otro</option></select></div>'
+      + '<div class="field"><label>Fecha</label><input type="date" id="aFecha" value="'+todayISO()+'"></div>'
+      + '<div class="field"><label>Descripción</label><textarea id="aDesc" placeholder="Qué avisó el rastreador"></textarea></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="saveAlerta">Guardar</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        sheet.querySelector('#saveAlerta').addEventListener('click', function(){
+          var motoId = document.getElementById('aMoto').value;
+          var moto = motoById(motoId);
+          db.collection(negocioPath('alertas')).add({
+            motoId: motoId, motoPlaca: moto?moto.placa:'', tipo: document.getElementById('aTipo').value,
+            fecha: document.getElementById('aFecha').value||todayISO(),
+            descripcion: document.getElementById('aDesc').value||'', atendida:false, createdAt: Date.now()
+          }).then(closeSheet).catch(showSaveError);
+        });
+      }
+    );
+  }
+
+  function openRulesForm(motoId){
+    var m = motoById(motoId); if(!m) return;
+    openSheet(
+      '<h2>Reglas GPS · '+escapeHtml(m.placa)+'</h2>'
+      + '<div class="field"><label>Zona autorizada</label><input id="rZona" placeholder="Ej: perímetro urbano de Neiva" value="'+escapeHtml(m.zona||'')+'"></div>'
+      + '<div class="two-col"><div class="field"><label>Hora inicio permitida</label><input type="time" id="rInicio" value="'+(m.horaInicio||'06:00')+'"></div>'
+      + '<div class="field"><label>Hora fin permitida</label><input type="time" id="rFin" value="'+(m.horaFin||'21:00')+'"></div></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="saveRules">Guardar</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        sheet.querySelector('#saveRules').addEventListener('click', function(){
+          db.doc(negocioPath('motos')+'/'+motoId).update({
+            zona: document.getElementById('rZona').value||'',
+            horaInicio: document.getElementById('rInicio').value||'',
+            horaFin: document.getElementById('rFin').value||''
+          }).then(closeSheet).catch(showSaveError);
+        });
+      }
+    );
+  }
+
+  // ---------- events ----------
+  function wireView(){
+    var reiniciarNominaBtn = document.getElementById('reiniciarNomina');
+    if(reiniciarNominaBtn){
+      reiniciarNominaBtn.addEventListener('click', function(){
+        if(!isOwnerView) return;
+        var monto = nominaAcumulada();
+        if(monto<=0){ showToast('No hay nómina acumulada para reiniciar.'); return; }
+        askConfirm('Reiniciar nómina',
+          '¿Ya pagaste <b>'+fmtMoney(monto)+'</b> de nómina/administración? El contador vuelve a $0.<br><br>No registres este pago como gasto en Finanzas: ese dinero ya se apartó de cada renta, y se descontaría dos veces.',
+          'Sí, ya la pagué', function(){
+            db.doc(negocioPath('config')+'/nomina').set({ ultimoReinicio: Date.now() }, { merge: true })
+              .then(function(){ showToast('Nómina reiniciada a $0.'); }).catch(showSaveError);
+          });
+      });
+    }
+    document.querySelectorAll('[data-del-mov]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(!isOwnerView) return;
+        var id = b.getAttribute('data-del-mov');
+        var mov = state.movimientos.find(function(m){return m.id===id;});
+        if(!mov) return;
+        // Si es una renta, también se borra su parte de nómina (se crearon juntas).
+        // Antes quedaba "huérfana" y la nómina acumulada mostraba de más.
+        var parejas = (mov.tipo==='ingreso' && mov.categoria==='Renta') ? state.movimientos.filter(function(m){
+          return (m.tipo==='nomina' || m.tipo==='deposito') && m.motoId===mov.motoId && m.fecha===mov.fecha && m.createdAt===mov.createdAt;
+        }) : [];
+        var extraTxt = parejas.map(function(pm){ return fmtMoney(pm.monto)+' de '+(pm.tipo==='nomina'?'nómina':'depósito'); }).join(' y ');
+        askConfirm('Eliminar movimiento',
+          escapeHtml(mov.categoria||'Movimiento')+' de <b>'+fmtMoney(mov.monto)+'</b> del '+fmtDate(mov.fecha)+'.'+(parejas.length?(' También se borran los '+extraTxt+' de esa renta.'):''),
+          'Eliminar', function(){
+            var batch = db.batch();
+            batch.delete(db.doc(negocioPath('movimientos')+'/'+id));
+            parejas.forEach(function(pm){ batch.delete(db.doc(negocioPath('movimientos')+'/'+pm.id)); });
+            batch.commit().catch(showSaveError);
+          });
+      });
+    });
+    document.querySelectorAll('[data-edit-mov]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(!isOwnerView) return;
+        var mov = state.movimientos.find(function(m){return m.id===b.getAttribute('data-edit-mov');});
+        if(mov) openMovForm(mov);
+      });
+    });
+    document.querySelectorAll('[data-view-photo-mov]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var mov = state.movimientos.find(function(m){return m.id===b.getAttribute('data-view-photo-mov');});
+        if(mov) openImageLightbox(mov.fotoUrl);
+      });
+    });
+    document.querySelectorAll('[data-del-moto]').forEach(function(b){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = b.getAttribute('data-del-moto'), m = motoById(id);
+        if(!m) return;
+        var c = cuentaDeMoto(m);
+        askConfirm('Eliminar moto',
+          '¿Eliminar la moto <b>'+escapeHtml(m.placa)+'</b>? Sus rentas y gastos ya registrados se conservan y siguen contando en la cuenta de <b>'+escapeHtml(nombreCuenta(c))+'</b>.',
+          'Eliminar', function(){
+            // Antes de borrar la moto se le graba la cuenta a cada registro suyo,
+            // para que su historia siga en la misma cuenta y nunca pase a la otra.
+            var refs = [];
+            state.movimientos.forEach(function(mv){ if(mv.motoId===id && (mv.cuenta||'')!==c) refs.push(db.doc(negocioPath('movimientos')+'/'+mv.id)); });
+            state.mantenimientos.forEach(function(mt){ if(mt.motoId===id && (mt.cuenta||'')!==c) refs.push(db.doc(negocioPath('mantenimientos')+'/'+mt.id)); });
+            var recs = state.recurrentes.filter(function(r){ return r.motoId!==id; });
+            var tandas = [];
+            for(var i=0;i<refs.length;i+=400) tandas.push(refs.slice(i,i+400));
+            var p = Promise.resolve();
+            tandas.forEach(function(t){ p = p.then(function(){ var bt = db.batch(); t.forEach(function(r){ bt.update(r, { cuenta: c }); }); return bt.commit(); }); });
+            p.then(function(){ return recs.length!==state.recurrentes.length ? db.doc(negocioPath('config')+'/recurrentes').set({ items: recs, updatedAt: Date.now() }) : null; })
+             .then(function(){ return db.doc(negocioPath('motos')+'/'+id).delete(); })
+             .then(function(){ showToast('Moto '+m.placa+' eliminada. Su historia sigue en la cuenta de '+nombreCuenta(c)+'.'); })
+             .catch(showSaveError);
+          });
+      });
+    });
+    document.querySelectorAll('[data-open-moto]').forEach(function(row){
+      row.addEventListener('click', function(){ openMotoDetail(row.getAttribute('data-open-moto')); });
+    });
+    document.querySelectorAll('[data-open-mant]').forEach(function(row){
+      row.addEventListener('click', function(){
+        var mt = state.mantenimientos.find(function(x){return x.id===row.getAttribute('data-open-mant');});
+        if(mt) openMantForm(mt);
+      });
+    });
+    document.querySelectorAll('[data-del-mant]').forEach(function(b){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = b.getAttribute('data-del-mant');
+        var mt = state.mantenimientos.find(function(x){return x.id===id;});
+        askConfirm('Eliminar mantenimiento',
+          (mt?(escapeHtml(mt.motoPlaca||'')+' · '+escapeHtml(mt.tipo||'')+(mt.costo?(' de <b>'+fmtMoney(mt.costo)+'</b>'):'')+' del '+fmtDate(mt.fecha)+'.'):'¿Eliminar este registro?'),
+          'Eliminar', function(){ db.doc(negocioPath('mantenimientos')+'/'+id).delete().catch(showSaveError); });
+      });
+    });
+    document.querySelectorAll('[data-del-alerta]').forEach(function(b){
+      b.addEventListener('click', function(){ db.doc(negocioPath('alertas')+'/'+b.getAttribute('data-del-alerta')).delete().catch(showSaveError); });
+    });
+    document.querySelectorAll('[data-toggle-alerta]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var id = b.getAttribute('data-toggle-alerta');
+        var a = state.alertas.find(function(x){return x.id===id;});
+        if(a) db.doc(negocioPath('alertas')+'/'+id).update({atendida: !a.atendida}).catch(showSaveError);
+      });
+    });
+    document.querySelectorAll('[data-motofilter]').forEach(function(b){
+      b.addEventListener('click', function(){ state.motoFilter = b.getAttribute('data-motofilter'); render(); });
+    });
+    document.querySelectorAll('[data-editrules]').forEach(function(b){
+      b.addEventListener('click', function(){ openRulesForm(b.getAttribute('data-editrules')); });
+    });
+    document.querySelectorAll('[data-flag-mov]').forEach(function(b){
+      b.addEventListener('click', function(e){ e.stopPropagation(); openFlagForm(b.getAttribute('data-flag-mov'), b.getAttribute('data-flag-placa')); });
+    });
+    document.querySelectorAll('[data-unflag-mov]').forEach(function(b){
+      b.addEventListener('click', function(){ db.doc(negocioPath('supervision')+'/'+b.getAttribute('data-unflag-mov')).delete().catch(showSaveError); });
+    });
+    var recAdmin = document.getElementById('recAdmin');
+    if(recAdmin) recAdmin.addEventListener('click', openAdminRecurrentes);
+    document.querySelectorAll('[data-rec-pagar]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var r = state.recurrentes.find(function(x){return x.id===b.getAttribute('data-rec-pagar');});
+        if(r) openPagarRecurrente(r, state.viewMonth);
+      });
+    });
+    var recTodos = document.getElementById('recPagarTodos');
+    if(recTodos) recTodos.addEventListener('click', function(){
+      var mk = state.viewMonth;
+      var pend = recurrentesDelMes(mk, state.cuenta||'').filter(function(x){return !x.pago;});
+      var total = pend.reduce(function(a,x){return a+Number(x.rec.monto||0);},0);
+      askConfirm('Registrar gastos fijos',
+        'Se registran <b>'+pend.length+'</b> gastos por un total de <b>'+fmtMoney(total)+'</b>, cada uno con su valor configurado:<br>'
+          + pend.map(function(x){return '· '+escapeHtml(x.moto?x.moto.placa:'General')+' — '+escapeHtml(x.rec.nombre)+': '+fmtMoney(x.rec.monto);}).join('<br>'),
+        'Registrar todos', function(){
+          var batch = db.batch();
+          pend.forEach(function(x){
+            var ref = db.collection(negocioPath('movimientos')).doc();
+            batch.set(ref, { tipo:'gasto', monto:Number(x.rec.monto||0), categoria:x.rec.categoria||'Seguros (SOAT/todo riesgo)',
+              motoId:x.rec.motoId||null, motoPlaca:x.moto?x.moto.placa:null, fecha:x.fechaReg,
+              nota:x.rec.nombre+' — '+new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long',year:'numeric'}), fotoUrl:null,
+              recurrenteId:x.rec.id, recurrenteMes:mk, createdAt:Date.now(), cuenta: cuentaDeMotoId(x.rec.motoId) });
+          });
+          batch.commit().then(function(){ showToast(pend.length+' gastos fijos registrados.'); }).catch(showSaveError);
+        });
+    });
+    document.querySelectorAll('[data-cuenta]').forEach(function(b){
+      b.addEventListener('click', function(){ state.cuenta = b.getAttribute('data-cuenta'); render(); });
+    });
+    document.querySelectorAll('[data-go-cuenta]').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.cuenta = b.getAttribute('data-go-cuenta');
+        state.tab = 'finanzas';
+        document.querySelectorAll('#tabbar button').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')==='finanzas'); });
+        render();
+      });
+    });
+    var goRec = document.getElementById('goRecurrentes');
+    if(goRec) goRec.addEventListener('click', function(){
+      state.cuenta = '';
+      state.tab = 'finanzas';
+      document.querySelectorAll('#tabbar button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab')==='finanzas'); });
+      render();
+    });
+    document.querySelectorAll('[data-month-nav]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var delta = Number(b.getAttribute('data-month-nav'));
+        var next = shiftMonth(state.viewMonth, delta);
+        if(next>currentMonth) return; // no navegar a meses futuros
+        state.viewMonth = next; render();
+      });
+    });
+  }
+
+  document.getElementById('tabbar').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-tab]');
+    if(!btn) return;
+    document.querySelectorAll('#tabbar button').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.tab = btn.getAttribute('data-tab');
+    render();
+  });
+
+  // ---------- boot ----------
+  function subscribe(name, key){
+    var un = db.collection(negocioPath(name)).onSnapshot(function(snap){
+      state[key] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      render();
+    }, function(err){
+      console.error(name, err);
+      showToast('No se pudo leer "' + name + '": ' + (err && err.message ? err.message : String(err)), true);
+    });
+    unsubs.push(un);
+  }
+
+  function boot(){
+    subscribe('motos','motos');
+    subscribe('movimientos','movimientos');
+    subscribe('mantenimientos','mantenimientos');
+    subscribe('alertas','alertas');
+    subscribeNominaConfig();
+    subscribeRecurrentes();
+    if(isOwnerView) subscribe('supervision','supervision');
+    var existingSupBtn = document.querySelector('#tabbar button[data-tab="supervision"]');
+    if(isOwnerView && !existingSupBtn){
+      var tpl = document.getElementById('tplSupervisionTab');
+      if(tpl) document.getElementById('tabbar').appendChild(tpl.content.cloneNode(true));
+    }
+    if(!isOwnerView && existingSupBtn) existingSupBtn.remove();
+    document.getElementById('tabbar').style.gridTemplateColumns = isOwnerView ? 'repeat(6,1fr)' : '';
+    render();
+  }
+
+  // Deja la app lista para que otra persona inicie sesión: cierra las
+  // suscripciones en vivo del negocio anterior y limpia lo que se ve en pantalla.
+  function teardownApp(){
+    unsubs.forEach(function(u){ u(); }); unsubs = [];
+    state = { motos: [], movimientos: [], mantenimientos: [], alertas: [], supervision: [], tab: 'resumen', motoFilter: 'todas', viewMonth: currentMonth, nominaConfig: { ultimoReinicio: 0 }, recurrentes: [] };
+    var supBtn = document.querySelector('#tabbar button[data-tab="supervision"]');
+    if(supBtn) supBtn.remove();
+  }
+
+  // ---------- login / sesión (Firebase Authentication) ----------
+  // El "código del negocio" + el rol elegido arman un correo interno único, p.ej.
+  // "rzrentas.dueno@rzcontrol.app" — no es un correo real que reciba nada, es solo
+  // la forma en que Firebase Authentication identifica esa cuenta. La CLAVE sí es
+  // real y es la que tú defines al crear cada cuenta desde la consola de Firebase.
+  var auth = firebase.auth();
+  db = firebase.firestore();
+
+  function emailFor(negocio, rol){
+    return negocio.trim().toLowerCase().replace(/[^a-z0-9]/g,'') + '.' + rol + '@rzcontrol.app';
+  }
+
+  document.getElementById('loginRolSeg').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-v]');
+    if(!btn) return;
+    document.querySelectorAll('#loginRolSeg button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var negocio = document.getElementById('loginNegocio').value;
+    var rol = document.querySelector('#loginRolSeg button.active').getAttribute('data-v');
+    var clave = document.getElementById('loginClave').value;
+    var errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+    if(!negocio.trim() || !clave){ errEl.textContent = 'Completa el código del negocio y la clave.'; return; }
+    var submitBtn = document.getElementById('loginSubmit');
+    submitBtn.disabled = true; submitBtn.textContent = 'Entrando…';
+    auth.signInWithEmailAndPassword(emailFor(negocio, rol), clave)
+      .catch(function(err){
+        errEl.textContent = (err && (err.code==='auth/invalid-credential' || err.code==='auth/wrong-password' || err.code==='auth/user-not-found'))
+          ? 'Código de negocio, rol o clave incorrectos.'
+          : 'No se pudo iniciar sesión (' + (err && err.code || 'error') + ').';
+      })
+      .finally(function(){
+        submitBtn.disabled = false; submitBtn.textContent = 'Entrar';
+      });
+  });
+
+  // ---------- cambiar clave del dueño ----------
+  // Firebase exige confirmar la clave actual antes de cambiarla (así nadie que
+  // encuentre la app abierta puede cambiarla sin saber la clave).
+  function openCambiarClave(){
+    if(!isOwnerView) return;
+    openSheet(
+      '<h2>Cambiar clave del dueño</h2>'
+      + '<div class="owner-only-note">Usa al menos 6 caracteres. La nueva clave aplica en todos los dispositivos donde entres como Dueño.</div>'
+      + '<div class="field"><label for="ckActual">Clave actual</label><input id="ckActual" type="password" autocomplete="current-password"></div>'
+      + '<div class="field"><label for="ckNueva">Clave nueva</label><input id="ckNueva" type="password" autocomplete="new-password"></div>'
+      + '<div class="field"><label for="ckNueva2">Repite la clave nueva</label><input id="ckNueva2" type="password" autocomplete="new-password"></div>'
+      + '<div class="field-error" id="ckErr" hidden></div>'
+      + '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cancelar</button><button class="btn primary" id="ckSave">Cambiar clave</button></div>',
+      function(sheet){
+        sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+        var err = sheet.querySelector('#ckErr');
+        function fail(msg){ err.textContent = msg; err.hidden = false; }
+        sheet.querySelector('#ckSave').addEventListener('click', function(){
+          var actual = sheet.querySelector('#ckActual').value;
+          var nueva = sheet.querySelector('#ckNueva').value;
+          var nueva2 = sheet.querySelector('#ckNueva2').value;
+          err.hidden = true;
+          if(!actual) return fail('Escribe tu clave actual.');
+          if(nueva.length < 6) return fail('La clave nueva debe tener al menos 6 caracteres.');
+          if(nueva !== nueva2) return fail('Las dos claves nuevas no coinciden.');
+          if(nueva === actual) return fail('La clave nueva es igual a la actual.');
+          var user = auth.currentUser;
+          if(!user) return fail('La sesión se cerró. Vuelve a entrar e inténtalo de nuevo.');
+          var btn = sheet.querySelector('#ckSave');
+          btn.disabled = true; btn.textContent = 'Cambiando…';
+          var cred = firebase.auth.EmailAuthProvider.credential(user.email, actual);
+          user.reauthenticateWithCredential(cred)
+            .then(function(){ return user.updatePassword(nueva); })
+            .then(function(){ closeSheet(); showToast('Clave cambiada. Úsala la próxima vez que entres como Dueño.'); })
+            .catch(function(e){
+              var c = e && e.code;
+              if(c==='auth/wrong-password' || c==='auth/invalid-credential' || c==='auth/invalid-login-credentials') fail('La clave actual no es correcta.');
+              else if(c==='auth/weak-password') fail('Esa clave es muy débil. Usa una más larga.');
+              else if(c==='auth/too-many-requests') fail('Demasiados intentos. Espera unos minutos y vuelve a intentar.');
+              else if(c==='auth/network-request-failed') fail('Sin conexión a internet. Revisa la señal e inténtalo de nuevo.');
+              else fail('No se pudo cambiar la clave ('+(c||'error')+').');
+            })
+            .finally(function(){ btn.disabled = false; btn.textContent = 'Cambiar clave'; });
+        });
+      }
+    );
+  }
+  document.getElementById('claveBtn').addEventListener('click', openCambiarClave);
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged(function(user){
+    if(!user){
+      teardownApp();
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginClave').value = '';
+      return;
+    }
+    // El correo interno es "<negocioId>.<rol>@rzcontrol.app" — de ahí sacamos
+    // ambos datos en vez de guardarlos aparte.
+    var email = user.email || '';
+    var parts = email.split('@')[0].split('.');
+    negocioId = parts[0] || 'default';
+    isOwnerView = parts[1] === 'dueno';
+    document.getElementById('claveBtn').hidden = !isOwnerView;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = '';
+    boot();
+  });
+})();
+</script>
+</body>
+</html>
