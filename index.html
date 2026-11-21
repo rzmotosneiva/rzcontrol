@@ -79,7 +79,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
 
 .tabbar{
   position:sticky; bottom:0; z-index:20;
-  display:grid; grid-template-columns:repeat(5,1fr);
+  display:grid; grid-template-columns:repeat(4,1fr);
   background:var(--surface); border-top:1px solid var(--border);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -160,6 +160,14 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
 .cal-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:var(--text-muted); margin-bottom:18px;}
 .cal-legend span{display:inline-flex; align-items:center; gap:5px;}
 .cal-dot{width:9px; height:9px; border-radius:3px; display:inline-block;}
+.cal-day.rest{background:var(--accent-soft); color:var(--accent-strong); font-weight:700; box-shadow:0 0 0 1px var(--border) inset;}
+.cal-day.rest::after{content:'D'; font-size:8px; margin-left:1px; vertical-align:super; opacity:.8;}
+.cal-dot.rest{background:var(--accent);}
+.cal-day{position:relative;}
+.cal-day.fest::before{content:'F'; position:absolute; top:2px; right:4px; font-size:8.5px; font-weight:800; color:#7c3aed;}
+.cal-day.fest:not(.paid):not(.miss):not(.rest){box-shadow:0 0 0 1.5px #a78bfa inset;}
+.cal-dot.fest{background:#a78bfa;}
+.pill.fest{background:#ede9fe; color:#6d28d9;}
 .cal-dot.paid{background:var(--success);} .cal-dot.miss{background:var(--danger);} .cal-dot.blank{background:var(--surface-2); border:1px solid var(--border);}
 
 .empty{padding:34px 18px; text-align:center; color:var(--text-muted); border:1px dashed var(--border); border-radius:var(--radius); font-size:13.5px;}
@@ -216,6 +224,59 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
 .gps-mini b{color:var(--text); font-weight:600; display:block; font-size:13px;}
 
 ::placeholder{color:var(--text-muted); opacity:.7;}
+
+/* Libro contable (tipo hoja de cálculo) */
+.sheet-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); margin-bottom:14px; -webkit-overflow-scrolling:touch;}
+.libro-cards{display:flex; flex-direction:column; gap:8px; margin-bottom:12px;}
+.libro-tabla{display:none;}
+@media (min-width:700px){ .libro-cards{display:none;} .libro-tabla{display:block;} }
+.lc{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 12px; display:flex; align-items:center; gap:10px; cursor:pointer;}
+.lc .main{flex:1; min-width:0;}
+.lc .t{font-weight:600; font-size:14.5px;}
+.lc .m{color:var(--text-muted); font-size:12.5px; margin-top:2px;}
+.lc .d{color:var(--text-muted); font-size:12px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lc .amt{font-family:'Oswald',sans-serif; font-size:16.5px; white-space:nowrap;}
+.lc .amt.pos{color:var(--success);} .lc .amt.neg{color:var(--danger);}
+.pill.dia-rest{background:var(--warning-bg); color:var(--warning);}
+.lc.dia{background:transparent; border-style:dashed;}
+.lc.dia.nopago{border-color:var(--danger);}
+table.libro tr.dia td{color:var(--text-muted);}
+table.libro tr.dia.nopago{background:color-mix(in srgb, var(--danger) 6%, transparent);}
+.mini-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;}
+.mini-grid > div{background:var(--surface-2); border-radius:10px; padding:9px 11px; min-width:0;}
+.mini-grid .k{font-size:11.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em;}
+.mini-grid .v{font-family:'Oswald',sans-serif; font-size:19px; margin-top:2px;}
+.mini-grid .v.pos{color:var(--success);} .mini-grid .v.neg{color:var(--danger);}
+.lc-total{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; background:var(--surface-2); border-radius:var(--radius); padding:10px 12px; font-weight:600; font-size:13.5px;}
+table.libro{border-collapse:collapse; width:100%; min-width:520px; font-size:13.5px;}
+table.libro th{position:sticky; top:0; background:var(--surface-2); color:var(--text-muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em; text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); white-space:nowrap;}
+table.libro td{padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+table.libro tr:last-child td{border-bottom:none;}
+table.libro td.num, table.libro th.num{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+table.libro td.pos{color:var(--success);} table.libro td.neg{color:var(--danger);}
+table.libro td .sub{display:block; font-size:11.5px; color:var(--text-muted); margin-top:1px;}
+table.libro tr.tap{cursor:pointer;}
+table.libro tr.tap:active td{background:var(--accent-soft);}
+table.libro tr.total td{background:var(--accent-soft); font-weight:700;}
+table.libro th.salio, table.libro tr.total td.neg{color:var(--danger);}
+table.libro th.entro, table.libro tr.total td.pos{color:var(--success);}
+table.libro tr.sel td{background:var(--accent-soft);}
+.filtros{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+.filtros select{flex:1; min-width:150px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 11px; font-size:14.5px; color:var(--text); font-family:inherit;}
+.big-saldo{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px;}
+.big-saldo .label{font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em;}
+.big-saldo .value{font-family:'Oswald',sans-serif; font-size:34px; margin:4px 0 6px;}
+.big-saldo .value.pos{color:var(--success);} .big-saldo .value.neg{color:var(--danger);}
+.big-saldo .line{display:flex; gap:16px; flex-wrap:wrap; font-size:14px;}
+.big-saldo .line b.pos{color:var(--success);} .big-saldo .line b.neg{color:var(--danger);}
+.ver-gastos{cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;}
+.ver-gastos::after{content:' ›'; font-weight:700;}
+.gasto-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 13px; display:flex; gap:10px; align-items:flex-start;}
+.gasto-item .main{flex:1; min-width:0;}
+.gasto-item .t{font-weight:600; font-size:14.5px;}
+.gasto-item .d{font-size:13px; margin-top:2px;}
+.gasto-item .m{font-size:11.5px; color:var(--text-muted); margin-top:3px;}
+.gasto-item .amt{font-family:'Oswald',sans-serif; font-size:16px; color:var(--danger); white-space:nowrap;}
 
 .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(90px + env(safe-area-inset-bottom,0px)); z-index:60; max-width:min(92vw,520px); background:var(--text); color:var(--bg); padding:11px 15px; border-radius:11px; font-size:13px; line-height:1.45; box-shadow:0 8px 20px rgba(0,0,0,.25);}
 .toast.err{background:var(--danger); color:#fff;}
@@ -285,10 +346,6 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     <button data-tab="mantenimiento">
       <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 1 5.4-5.4L21 6l-3-3-3.3 3.3Z"/></svg>
       Mant.
-    </button>
-    <button data-tab="gps">
-      <svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
-      GPS
     </button>
   </nav>
 </div>
@@ -377,6 +434,73 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   // devolvérselo al arrendatario al terminar la renta. No es ingreso del negocio
   // mientras esté en custodia; solo lo que se retenga al liquidar entra como ingreso.
   var DEPOSITO_DIARIO = 5000;
+  // Días festivos: la renta vale TARIFA_FESTIVO. De eso ADMIN_FESTIVO es para
+  // el administrador y el resto para RZ. Ese día NO se aparta depósito.
+  var TARIFA_FESTIVO = 13000;
+  var ADMIN_FESTIVO = 3000;
+  var festivosCache = {};
+  // Festivos de Colombia (Ley 51 de 1983 "Ley Emiliani"): unos fijos, otros
+  // se pasan al lunes siguiente, y otros dependen de la Semana Santa.
+  function festivosColombia(y){
+    if(festivosCache[y]) return festivosCache[y];
+    function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function lunes(d){ var x = new Date(d); var dow = x.getDay(); if(dow!==1) x.setDate(x.getDate() + ((8-dow)%7)); return x; }
+    function mas(d, n){ var x = new Date(d); x.setDate(x.getDate()+n); return x; }
+    // Domingo de Pascua (algoritmo de Meeus/Butcher)
+    var a=y%19, b=Math.floor(y/100), c=y%100, d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3),
+        hh=(19*a+b-d-g+15)%30, i=Math.floor(c/4), k=c%4, l=(32+2*e+2*i-hh-k)%7, mm=Math.floor((a+11*hh+22*l)/451),
+        mes=Math.floor((hh+l-7*mm+114)/31), dia=((hh+l-7*mm+114)%31)+1;
+    var pascua = new Date(y, mes-1, dia);
+    var r = {};
+    r[y+'-01-01']='Año Nuevo';
+    r[iso(lunes(new Date(y,0,6)))]='Reyes Magos';
+    r[iso(lunes(new Date(y,2,19)))]='San José';
+    r[iso(mas(pascua,-3))]='Jueves Santo';
+    r[iso(mas(pascua,-2))]='Viernes Santo';
+    r[y+'-05-01']='Día del Trabajo';
+    r[iso(mas(pascua,43))]='Ascensión del Señor';
+    r[iso(mas(pascua,64))]='Corpus Christi';
+    r[iso(mas(pascua,71))]='Sagrado Corazón';
+    r[iso(lunes(new Date(y,5,29)))]='San Pedro y San Pablo';
+    r[y+'-07-20']='Independencia';
+    r[y+'-08-07']='Batalla de Boyacá';
+    r[iso(lunes(new Date(y,7,15)))]='Asunción de la Virgen';
+    r[iso(lunes(new Date(y,9,12)))]='Día de la Raza';
+    r[iso(lunes(new Date(y,10,1)))]='Todos los Santos';
+    r[iso(lunes(new Date(y,10,11)))]='Independencia de Cartagena';
+    r[y+'-12-08']='Inmaculada Concepción';
+    r[y+'-12-25']='Navidad';
+    festivosCache[y] = r; return r;
+  }
+  // Devuelve el nombre del festivo, o '' si ese día no es festivo.
+  // config/festivos guarda los que se marcan o desmarcan a mano.
+  function nombreFestivo(f){
+    if(!f) return '';
+    var cfg = state.festivosCfg || {};
+    if((cfg.quitados||[]).indexOf(f)>=0) return '';
+    if((cfg.extra||[]).indexOf(f)>=0) return 'Festivo marcado a mano';
+    return festivosColombia(Number(f.slice(0,4)))[f] || '';
+  }
+  function esFestivo(f){ return !!nombreFestivo(f); }
+  function marcarFestivo(f, si, onDone){
+    var cfg = state.festivosCfg || {};
+    var extra = (cfg.extra||[]).filter(function(x){ return x!==f; });
+    var quitados = (cfg.quitados||[]).filter(function(x){ return x!==f; });
+    var auto = !!festivosColombia(Number(f.slice(0,4)))[f];
+    if(si && !auto) extra.push(f);
+    if(!si && auto) quitados.push(f);
+    var nuevo = { extra: extra, quitados: quitados, updatedAt: Date.now() };
+    db.doc(negocioPath('config')+'/festivos').set(nuevo)
+      .then(function(){ state.festivosCfg = nuevo; if(onDone) onDone(); }).catch(showSaveError);
+  }
+  function subscribeFestivos(){
+    var un = db.doc(negocioPath('config')+'/festivos').onSnapshot(function(doc){
+      state.festivosCfg = doc.exists ? doc.data() : {};
+      render();
+    }, function(err){ console.error('config/festivos', err); });
+    unsubs.push(un);
+  }
+  function tarifaDelDia(moto, f){ return esFestivo(f) ? TARIFA_FESTIVO : (Number(moto.tarifaDiaria)||0); }
   var state = { motos: [], movimientos: [], mantenimientos: [], alertas: [], supervision: [], tab: 'resumen', motoFilter: 'todas', viewMonth: null, nominaConfig: { ultimoReinicio: 0 }, recurrentes: [] };
   var unsubs = [];
 
@@ -385,7 +509,8 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   // y ADMIN_DIARIO va como tipo "nomina" (no se cuenta en la suma general,
   // se acumula aparte para pagos de nómina/administración).
   function registrarPagoRenta(moto, fecha, notaExtra, onDone, yaConfirmado){
-    var total = Number(moto.tarifaDiaria) || 0;
+    var festivo = esFestivo(fecha);
+    var total = tarifaDelDia(moto, fecha);
     if(total<=0){
       showToast('La moto '+moto.placa+' no tiene tarifa diaria. Edítala y escribe la tarifa antes de registrar la renta.', true);
       return;
@@ -401,16 +526,19 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
       return;
     }
     // Las motos de otros propietarios no aportan a la nómina de RZ.
-    var admin = cuentaDeMoto(moto) ? 0 : Math.min(ADMIN_DIARIO, total);
-    var deposito = Math.min(DEPOSITO_DIARIO, total - admin);
+    var admin = cuentaDeMoto(moto) ? 0 : Math.min(festivo ? ADMIN_FESTIVO : ADMIN_DIARIO, total);
+    var deposito = festivo ? 0 : Math.min(DEPOSITO_DIARIO, total - admin);
     var general = total - admin - deposito;
     var base = { motoId: moto.id, motoPlaca: moto.placa, fecha: fecha, createdAt: Date.now(), cuenta: cuentaDeMoto(moto) };
     var batch = db.batch();
     var refGeneral = db.collection(negocioPath('movimientos')).doc();
-    batch.set(refGeneral, Object.assign({}, base, { tipo: 'ingreso', monto: general, categoria: 'Renta', nota: notaExtra || '' }));
+    // Número de renta: une las 3 partes (renta, nómina, depósito) del mismo pago.
+    base.rentaId = refGeneral.id; base.registradoPor = rolActual();
+    batch.set(refGeneral, Object.assign({}, base, { tipo: 'ingreso', monto: general, categoria: 'Renta', festivo: festivo,
+      nota: festivo ? ('Festivo: '+nombreFestivo(fecha)+(notaExtra?' · '+notaExtra:'')) : (notaExtra || '') }));
     if(admin > 0){
       var refAdmin = db.collection(negocioPath('movimientos')).doc();
-      batch.set(refAdmin, Object.assign({}, base, { tipo: 'nomina', monto: admin, categoria: 'Administración', nota: 'Separado automático de la renta diaria' }));
+      batch.set(refAdmin, Object.assign({}, base, { tipo: 'nomina', monto: admin, categoria: 'Administración', nota: festivo ? 'Separado automático (día festivo)' : 'Separado automático de la renta diaria' }));
     }
     if(deposito > 0){
       var refDep = db.collection(negocioPath('movimientos')).doc();
@@ -418,6 +546,98 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     }
     batch.commit().then(onDone).catch(showSaveError);
   }
+  // ---------- PAPELERA (nada se borra sin dejar copia) ----------
+  // Antes de borrar algo se guarda una copia en "papelera" con quién y cuándo
+  // lo borró. Desde Finanzas → Papelera el dueño lo puede restaurar.
+  // Si las reglas de Firebase todavía no permiten la papelera, se borra igual
+  // (como antes) y se avisa, para no dejar la app trabada.
+  function rolActual(){ return isOwnerView ? 'Dueño' : 'Encargado'; }
+  function limpiarDatos(d){ var o = {}; Object.keys(d||{}).forEach(function(k){ if(k!=='id' && d[k]!==undefined) o[k]=d[k]; }); return o; }
+  function borrarConPapelera(items, resumen){
+    var grupo = 'g'+Date.now()+Math.random().toString(36).slice(2,6);
+    var batch = db.batch();
+    items.forEach(function(it){
+      batch.set(db.collection(negocioPath('papelera')).doc(), {
+        coleccion: it.col, docId: it.id, datos: limpiarDatos(it.data), grupo: grupo,
+        resumen: resumen || '', borradoEn: Date.now(), borradoPor: rolActual()
+      });
+      batch.delete(db.doc(negocioPath(it.col)+'/'+it.id));
+    });
+    return batch.commit().catch(function(err){
+      if(err && (err.code==='permission-denied' || /permission/i.test(err.message||''))){
+        var b2 = db.batch();
+        items.forEach(function(it){ b2.delete(db.doc(negocioPath(it.col)+'/'+it.id)); });
+        return b2.commit().then(function(){ showToast('Se borró, pero NO quedó copia en la papelera: falta activar el permiso en Firebase.', true); });
+      }
+      throw err;
+    });
+  }
+  function subscribePapelera(){
+    if(!isOwnerView) return;
+    var un = db.collection(negocioPath('papelera')).onSnapshot(function(snap){
+      state.papelera = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      state.papeleraBloqueada = false;
+      render();
+    }, function(err){ console.warn('papelera', err); state.papeleraBloqueada = true; });
+    unsubs.push(un);
+  }
+  function openPapelera(){
+    var grupos = {};
+    (state.papelera||[]).forEach(function(e){ (grupos[e.grupo||e.id] = grupos[e.grupo||e.id] || []).push(e); });
+    var lista = Object.keys(grupos).map(function(g){ return grupos[g]; })
+      .sort(function(a,b){ return Number(b[0].borradoEn||0)-Number(a[0].borradoEn||0); });
+    var html = '<h2>Papelera</h2><div class="owner-only-note">Aquí queda todo lo que se borra, con quién y cuándo lo borró. Si fue un error, tócalo para restaurarlo.</div>';
+    if(state.papeleraBloqueada) html += '<div class="warn-box"><b>La papelera no tiene permiso todavía</b>Lo que se borre no queda guardado aquí hasta que se active el permiso en las reglas de Firebase.</div>';
+    if(!lista.length) html += '<div class="empty"><b>La papelera está vacía</b></div>';
+    else html += '<div class="list">' + lista.map(function(g){
+      var e = g[0];
+      var cuando = new Date(Number(e.borradoEn||0)).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'short',hour:'numeric',minute:'2-digit'});
+      var tipo = e.coleccion==='motos' ? 'Moto' : e.coleccion==='mantenimientos' ? 'Mantenimiento' : 'Movimiento';
+      return '<div class="row-card"><div class="main"><div class="title">'+tipo+' · '+(e.resumen||'')+'</div>'
+        + '<div class="meta">Borrado por '+escapeHtml(e.borradoPor||'?')+' · '+cuando+(g.length>1?(' · '+g.length+' registros juntos'):'')+'</div></div>'
+        + '<button class="pill muted" data-restaurar="'+escapeHtml(e.grupo||e.id)+'" style="cursor:pointer;border:none;">Restaurar</button></div>';
+    }).join('') + '</div>';
+    html += '<div class="sheet-actions"><button class="btn ghost" id="cancelSheet">Cerrar</button></div>';
+    openSheet(html, function(sheet){
+      sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+      sheet.querySelectorAll('[data-restaurar]').forEach(function(b){
+        b.addEventListener('click', function(){
+          var g = grupos[b.getAttribute('data-restaurar')] || [];
+          var batch = db.batch();
+          g.forEach(function(e){
+            batch.set(db.doc(negocioPath(e.coleccion)+'/'+e.docId), e.datos||{});
+            batch.delete(db.doc(negocioPath('papelera')+'/'+e.id));
+          });
+          batch.commit().then(function(){ showToast('Restaurado.'); closeSheet(); }).catch(showSaveError);
+        });
+      });
+    });
+  }
+  // ---------- RESPALDO COMPLETO ----------
+  // Descarga TODOS los datos del negocio en un archivo (.json). Es la copia de
+  // seguridad: guárdala en iCloud/Drive. Sirve para recuperar todo si algo se daña.
+  function ultimoRespaldo(){ try{ return Number(localStorage.getItem('rz-respaldo-'+negocioId)||0); }catch(e){ return 0; } }
+  function descargarRespaldo(){
+    var datos = {
+      app: 'RZ Control', negocio: negocioId, creado: new Date().toISOString(), creadoPor: rolActual(),
+      motos: state.motos, movimientos: state.movimientos, mantenimientos: state.mantenimientos,
+      config: { recurrentes: state.recurrentes, festivos: state.festivosCfg||{}, nomina: state.nominaConfig||{} },
+      papelera: state.papelera||[],
+      conteo: { motos: state.motos.length, movimientos: state.movimientos.length, mantenimientos: state.mantenimientos.length }
+    };
+    var nombre = 'RZ-respaldo-'+todayISO()+'.json';
+    try{
+      var blob = new Blob([JSON.stringify(datos, null, 1)], {type:'application/json'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      try{ localStorage.setItem('rz-respaldo-'+negocioId, String(Date.now())); }catch(e){}
+      showToast('Respaldo descargado: '+nombre+' ('+datos.conteo.movimientos+' movimientos). Guárdalo en iCloud o Drive.');
+      render();
+    }catch(e){ showToast('No se pudo descargar en este navegador.', true); }
+  }
+
   // ---------- CUENTAS SEPARADAS (motos de otros propietarios) ----------
   // Cada moto tiene un "propietario". Vacío = RZ Rentas. Cualquier otro nombre
   // (p. ej. "Administrador") es una cuenta aparte: su plata y sus gastos NO
@@ -486,6 +706,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     return state.movimientos.filter(function(mv){
       if(mv.motoId!==m.id || mv.tipo!=='ingreso' || mv.categoria!=='Renta') return false;
       if(mv.fecha < m.fechaInicioRenta || Number(mv.createdAt||0) <= corte) return false;
+      if(mv.festivo) return false;
       return !state.movimientos.some(function(d){ return d.tipo==='deposito' && d.motoId===m.id && d.createdAt===mv.createdAt; });
     });
   }
@@ -903,6 +1124,19 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   // El día de HOY nunca se cuenta como "en mora" (todavía puede pagarse antes de
   // que termine) — solo días anteriores ya cerrados y sin pago registrado.
   // Si no se definió fecha de inicio de renta, no hay nada que evaluar aún.
+  // Días de descanso del conductor, guardados en la moto como lista de fechas.
+  function esDescanso(m, iso){ return !!(m && Array.isArray(m.descansos) && m.descansos.indexOf(iso)>=0); }
+  function guardarDescanso(m, iso, marcar, onDone){
+    var lista = Array.isArray(m.descansos) ? m.descansos.slice() : [];
+    var i = lista.indexOf(iso);
+    if(marcar && i<0) lista.push(iso);
+    if(!marcar && i>=0) lista.splice(i,1);
+    lista.sort();
+    db.doc(negocioPath('motos')+'/'+m.id).update({ descansos: lista })
+      .then(function(){ m.descansos = lista; if(onDone) onDone(); })
+      .catch(showSaveError);
+  }
+
   function computeMissedDays(motoId, monthKeyStr){
     var m = motoById(motoId);
     if(!m || m.estado!=='rentada') return [];
@@ -921,6 +1155,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
       var iso = monthKeyStr+'-'+(d<10?'0'+d:d);
       if(iso>=today) break;
       if(iso<m.fechaInicioRenta) continue;
+      if(esDescanso(m, iso)) continue; // día de descanso del conductor: no cuenta como no pagado
       if(!paidDates[iso]) missed.push(iso);
     }
     return missed;
@@ -969,16 +1204,22 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
       var iso = mk+'-'+(d<10?'0'+d:d);
       var cls = 'cal-day';
       var clickAttr = '';
-      if(iso>today) cls += ' blank';
-      else if(paidSet[iso]){ cls += ' paid clickable'; clickAttr = ' data-cal-info="'+iso+'"'; }
-      else if(missedSet[iso]){ cls += ' miss clickable'; clickAttr = ' data-cal-pay="'+iso+'"'; }
+      var puedeMarcar = m.estado==='rentada' && (!m.fechaInicioRenta || iso>=m.fechaInicioRenta);
+      if(paidSet[iso] && iso<=today){ cls += ' paid clickable'; clickAttr = ' data-cal-info="'+iso+'"'; }
+      else if(esDescanso(m, iso)){ cls += ' rest clickable'; clickAttr = ' data-cal-dia="'+iso+'"'; }
+      else if(missedSet[iso]){ cls += ' miss clickable'; clickAttr = ' data-cal-dia="'+iso+'"'; }
+      else if(puedeMarcar && iso>=today){ cls += ' blank clickable'; clickAttr = ' data-cal-dia="'+iso+'"'; }
+      else if(iso>today) cls += ' blank';
       if(iso===today) cls += ' today';
+      if(esFestivo(iso)){ cls += ' fest'; if(!clickAttr && iso<=today) { cls += ' clickable'; clickAttr = ' data-cal-dia="'+iso+'"'; } }
       html += '<div class="'+cls+'"'+clickAttr+'>'+d+'</div>';
     }
     html += '</div>';
     html += '<div class="cal-legend">'
       + '<span><span class="cal-dot paid"></span>Pagado (toca para ver el detalle)</span>'
-      + (evaluaMora ? '<span><span class="cal-dot miss"></span>Sin pago (toca para registrarlo)</span>' : '')
+      + (evaluaMora ? '<span><span class="cal-dot miss"></span>Sin pago (toca para registrar pago o descanso)</span>' : '')
+      + '<span><span class="cal-dot rest"></span>Descanso del conductor</span>'
+      + '<span><span class="cal-dot fest"></span>Festivo ('+fmtMoney(TARIFA_FESTIVO)+', sin depósito)</span>'
       + '<span><span class="cal-dot blank"></span>Sin registro</span>'
       + '</div>';
     if(!evaluaMora){
@@ -995,9 +1236,11 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     var totalMes = pagos.reduce(function(a,p){return a+p.cobrado;},0);
     var diasPagados = Object.keys(paidSet).length;
     var diasSinPago = Object.keys(missedSet).length;
+    var diasDescanso = (Array.isArray(m.descansos)?m.descansos:[]).filter(function(f){ return monthKey(f)===mk && f<=today; }).length;
     html += '<div class="stat-list" style="margin-top:4px;">'
       + statRow('Días pagados en '+new Date(mk+'-02').toLocaleDateString('es-CO',{month:'long'}), diasPagados+' día(s)', 'pos')
       + (evaluaMora ? statRow('Días sin pago', diasSinPago+' día(s)', diasSinPago?'neg':'') : '')
+      + (diasDescanso ? statRow('Días de descanso', diasDescanso+' día(s)') : '')
       + statRowTotal('Total cobrado en renta', fmtMoney(totalMes), 'pos')
       + '</div>';
     if(pagos.length){
@@ -1097,7 +1340,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
           + '<div class="m">'+fmtDate(it.fecha)+' · '+(it.placa?escapeHtml(it.placa):'General')+(it.nota?(' · '+escapeHtml(it.nota)):'')+(reg?(' · registrado '+reg):'')+'</div></div>'
           + '<div class="amt '+(it.signo>0?'pos':'neg')+'">'+(it.signo>0?'+':'−')+fmtMoney(it.monto)+'</div></div>';
       });
-      html += '<div class="dg-total"><span>Ingresos '+fmtMoney(r.ingresos)+' − Gastos '+fmtMoney(r.gastos)+'</span><span style="color:'+(r.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(r.neto)+'</span></div>';
+      html += '<div class="dg-total"><span>Ingresos <span style="color:var(--success)">'+fmtMoney(r.ingresos)+'</span> − Gastos <span style="color:var(--danger)">'+fmtMoney(r.gastos)+'</span></span><span style="color:'+(r.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(r.neto)+'</span></div>';
       html += '<div class="owner-only-note" style="margin:8px 0 0;">El saldo del mes arranca en $0: no arrastra lo del mes anterior. Si hoy se registra un gasto antes que las rentas, el mes se ve en negativo hasta que entren las rentas. La nómina ('+fmtMoney(ADMIN_DIARIO)+' por renta) no aparece aquí porque se aparta antes.</div>';
     }
     html += '</div></details>';
@@ -1119,115 +1362,87 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   }
 
   // ---------- RESUMEN ----------
+  // Pensado para leerse en 10 segundos: cuánto quedó este mes, qué necesita
+  // atención y cómo va cada moto. El detalle está en Finanzas (libro contable).
   function renderResumen(){
-    // Resumen = solo las cuentas de RZ Rentas. Las motos de otros propietarios
-    // se ven aparte (tarjeta "Cuentas aparte" y en Finanzas).
     var motosRZ = state.motos.filter(function(m){ return !cuentaDeMoto(m); });
-    var movsRZ = state.movimientos.filter(function(m){ return cuentaDeMov(m)===''; });
-    var mantsRZ = state.mantenimientos.filter(function(mt){ return cuentaDeMant(mt)===''; });
-    var movMes = movsRZ.filter(function(m){return monthKey(m.fecha)===state.viewMonth && (m.tipo==='ingreso'||m.tipo==='gasto');});
-    var mantMes = mantsRZ.filter(function(mt){return monthKey(mt.fecha)===state.viewMonth;}).reduce(function(a,mt){return a+Number(mt.costo||0);},0);
-    var resumenMes = monthItems(state.viewMonth, '');
-    var ingresos = resumenMes.ingresos, gastos = resumenMes.gastos, neto = resumenMes.neto;
-    var disponibles = motosRZ.filter(function(m){return m.estado==='disponible';}).length;
-    var total = motosRZ.length;
+    var r = monthItems(state.viewMonth, '');
+    var nombreMes = new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'});
 
-    var histMant = mantsRZ.reduce(function(a,mt){return a+Number(mt.costo||0);},0);
-    var histIngresos = movsRZ.filter(function(m){return m.tipo==='ingreso';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
-    var histGastos = movsRZ.filter(function(m){return m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0) + histMant;
+    var html = renderMonthNav();
+    html += '<div class="big-saldo"><div class="label">Lo que quedó en '+nombreMes+'</div>'
+      + '<div class="value '+(r.neto>=0?'pos':'neg')+'">'+fmtMoney(r.neto)+'</div>'
+      + '<div class="line"><span>Entró <b class="pos">'+fmtMoney(r.ingresos)+'</b></span><span>Salió <b class="neg ver-gastos"'+gastosAttr('', 'mes', '')+'>'+fmtMoney(r.gastos)+'</b></span></div></div>';
+    // Plata apartada: nómina (solo el dueño la ve) y depósitos por devolver
+    html += '<div class="cards-grid" style="margin-bottom:12px;">'
+      + (isOwnerView ? card('Nómina acumulada', fmtMoney(nominaAcumulada()), '') : '')
+      + '<div class="card'+(isOwnerView?'':' wide')+'"><div class="label">Depósitos por devolver</div><div class="value">'+fmtMoney(depositosEnCustodia(''))+'</div><div class="sub">Suma de todas las motos de RZ</div></div>'
+      + '</div>';
+    var rentadas = motosRZ.filter(function(m){return m.estado==='rentada';}).length;
+    var hist = libroItems('', 'todo', '');
+    html += '<div class="stat-list" style="margin-bottom:12px;">'
+      + statRow('Motos de RZ', rentadas+' rentada(s) de '+motosRZ.length)
+      + statRow('Ganancia desde el principio', fmtMoney(hist.neto), hist.neto>=0?'pos':'neg')
+      + '</div>';
 
-    var alertasPend = state.alertas.filter(function(a){return !a.atendida;})
-      .sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');}).slice(0,4);
-
-    var vtos = [];
-    state.mantenimientos.forEach(function(mt){
-      if(mt.proximoVencimiento){
-        var d = daysUntil(mt.proximoVencimiento);
-        if(d!==null && d<=30) vtos.push({mt:mt, dias:d});
-      }
-    });
-    vtos.sort(function(a,b){return a.dias-b.dias;});
-
-    var html = '';
-    html += renderMonthNav();
-    html += '<div class="cards-grid">';
-    html += card('Ingresos del mes', fmtMoney(ingresos), 'pos');
-    html += card('Gastos del mes', fmtMoney(gastos), 'neg');
-    html += '<div class="card wide"><div class="label">Rentabilidad del mes</div>'
-          + '<div class="value '+(neto>=0?'pos':'neg')+'">'+fmtMoney(neto)+'</div>'
-          + '<div class="sub">'+movMes.length+' movimiento(s) financiero(s)'+(mantMes>0?(' + '+fmtMoney(mantMes)+' en mantenimiento'):'')+' este mes</div></div>';
-    html += '<div class="card wide"><div class="label">Flota</div>'
-          + '<div class="value">'+disponibles+' / '+total+'</div>'
-          + '<div class="sub">motos de RZ disponibles'+(state.motos.length>total?(' · '+(state.motos.length-total)+' moto(s) de otros propietarios no se cuentan aquí'):'')+'</div></div>';
-    var gGenMes = movMes.filter(function(m){return !m.motoId && m.tipo==='gasto';}).reduce(function(a,m){return a+Number(m.monto||0);},0);
-    html += '<div class="card wide"><div class="label">Gastos generales del mes</div>'
-          + '<div class="value neg">'+fmtMoney(gGenMes)+'</div>'
-          + '<div class="sub">gastos no asociados a una moto en particular (administrativos, etc.)</div></div>';
-    html += '<div class="card wide"><div class="label">Total histórico (todos los meses)</div>'
-          + '<div class="value '+(histIngresos-histGastos>=0?'pos':'neg')+'">'+fmtMoney(histIngresos-histGastos)+'</div>'
-          + '<div class="sub">Ingresos '+fmtMoney(histIngresos)+' · Gastos '+fmtMoney(histGastos)+' desde que empezaste a usar el panel</div></div>';
-    html += '</div>';
-    html += renderDesglose(state.viewMonth, neto<0, '');
-    cuentasTerceros().forEach(function(c){
-      var rc = monthItems(state.viewMonth, c);
-      var nMotos = state.motos.filter(function(m){ return cuentaDeMoto(m)===c; }).length;
-      html += '<div class="row-card tap" data-go-cuenta="'+escapeHtml(c)+'" style="margin-top:10px;"><div class="main">'
-        + '<div class="title">Cuenta aparte · '+escapeHtml(c)+'</div>'
-        + '<div class="meta">'+nMotos+' moto(s) · Ingresos '+fmtMoney(rc.ingresos)+' · Gastos '+fmtMoney(rc.gastos)+' · no se suma a RZ. Toca para ver su cuenta.</div></div>'
-        + '<div class="amount" style="color:'+(rc.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(rc.neto)+'</div></div>';
-    });
+    // Lo que necesita atención (solo aparece si hay algo)
+    var aten = [];
+    if(state.viewMonth===currentMonth){
+      motosRZ.forEach(function(m){
+        if(m.estado!=='rentada' || !m.fechaInicioRenta) return;
+        var miss = computeMissedDays(m.id, state.viewMonth);
+        if(miss.length) aten.push('<div class="row-card tap" data-open-moto="'+m.id+'"><div class="main"><div class="title">'+escapeHtml(m.placa)+' · '+miss.length+' día(s) sin pago este mes</div><div class="meta">Último sin pago: '+fmtDate(miss[miss.length-1])+' · toca para ver el calendario</div></div><span class="pill bad">Atraso</span></div>');
+      });
+    }
     var recPend = recurrentesDelMes(state.viewMonth, '').filter(function(x){return !x.pago;});
     if(recPend.length){
       var vencidos = recPend.filter(function(x){return x.vencido;}).length;
-      html += '<div class="row-card tap" id="goRecurrentes" style="margin-top:10px;"><div class="main">'
-        + '<div class="title">Gastos fijos sin registrar: '+recPend.length+'</div>'
-        + '<div class="meta">'+fmtMoney(recPend.reduce(function(a,x){return a+Number(x.rec.monto||0);},0))+(vencidos?(' · '+vencidos+' ya vencido(s)'):'')+' · toca para registrarlos en Finanzas</div></div>'
-        + '<span class="pill '+(vencidos?'bad':'warn')+'">Pendiente</span></div>';
+      aten.push('<div class="row-card tap" id="goRecurrentes"><div class="main"><div class="title">Gastos fijos sin registrar: '+recPend.length+'</div>'
+        + '<div class="meta">'+fmtMoney(recPend.reduce(function(a,x){return a+Number(x.rec.monto||0);},0))+(vencidos?(' · '+vencidos+' vencido(s)'):'')+' · toca para registrarlos</div></div>'
+        + '<span class="pill '+(vencidos?'bad':'warn')+'">Pendiente</span></div>');
+    }
+    state.mantenimientos.forEach(function(mt){
+      if(!mt.proximoVencimiento || cuentaDeMant(mt)!=='') return;
+      var d = daysUntil(mt.proximoVencimiento);
+      if(d===null || d>15) return;
+      aten.push('<div class="row-card tap" data-open-mant="'+mt.id+'"><div class="main"><div class="title">'+escapeHtml(mt.motoPlaca||'Moto')+' · '+escapeHtml(mt.tipo||'Mantenimiento')+'</div><div class="meta">Vence '+fmtDate(mt.proximoVencimiento)+'</div></div><span class="pill '+(d<0?'bad':'warn')+'">'+(d<0?'Vencido':(d+' d'))+'</span></div>');
+    });
+    if(isOwnerView){
+      var ur2 = ultimoRespaldo(), diasR = ur2 ? Math.floor((Date.now()-ur2)/86400000) : null;
+      if(diasR===null || diasR>=7) aten.push('<div class="row-card tap" id="goRespaldo"><div class="main"><div class="title">'+(diasR===null?'Haz tu primer respaldo de datos':'Último respaldo hace '+diasR+' días')+'</div><div class="meta">Toca para descargar la copia completa y guárdala en iCloud o Drive</div></div><span class="pill warn">Respaldo</span></div>');
+    }
+    if(aten.length){
+      html += '<div class="section-title">Necesita atención</div><div class="list">'+aten.join('')+'</div>';
     }
 
-    html += '<div class="section-title">Balance por moto — '+new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'})+'</div>';
+    // Cada moto: una tabla sencilla
+    html += '<div class="section-title">Cada moto en '+nombreMes+'</div>';
     if(motosRZ.length===0){
       html += '<div class="empty">Aún no tienes motos registradas.</div>';
     } else {
-      html += '<div class="list">' + motosRZ.map(function(m){
+      var filas = motosRZ.map(function(m){
         var s = computeMotoStatsForMonth(m.id, state.viewMonth);
-        return '<div class="moto-balance-row" data-open-moto="'+m.id+'">'
-          + '<div class="main"><div class="title">'+escapeHtml(m.placa)+'</div>'
-          + '<div class="meta">Renta '+fmtMoney(s.ingresos)+' · Gastos '+fmtMoney(s.gastos)+'</div></div>'
-          + '<div class="amount" style="color:'+(s.balance>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(s.balance)+'</div>'
-          + '</div>';
-      }).join('') + '</div>';
+        return { m:m, ing:s.ingresos, gas:s.gastos, bal:s.balance };
+      });
+      html += '<div class="sheet-wrap"><table class="libro" style="min-width:0;"><thead><tr><th>Moto</th><th class="num entro">Entró</th><th class="num salio">Salió</th><th class="num">Quedó</th></tr></thead><tbody>'
+        + filas.map(function(f){
+            return '<tr class="tap" data-open-moto="'+f.m.id+'"><td><b>'+escapeHtml(f.m.placa)+'</b><span class="sub">'+escapeHtml(f.m.estado||'')+'</span></td>'
+              + '<td class="num pos">'+fmtMoney(f.ing)+'</td><td class="num neg">'+(f.gas?'<span class="ver-gastos"'+gastosAttr('', 'mes', f.m.id)+'>'+fmtMoney(f.gas)+'</span>':fmtMoney(0))+'</td>'
+              + '<td class="num '+(f.bal>=0?'pos':'neg')+'"><b>'+fmtMoney(f.bal)+'</b></td></tr>';
+          }).join('')
+        + '</tbody></table></div>';
+      html += '<div class="owner-only-note" style="margin-top:-6px;">Toca una moto para ver su calendario de pagos. Los gastos generales (sin moto) solo aparecen en el total de arriba.</div>';
     }
 
-    html += '<div class="section-title">Alertas sin atender</div>';
-    if(alertasPend.length===0){
-      html += '<div class="empty">Sin alertas pendientes.</div>';
-    } else {
-      html += '<div class="list">' + alertasPend.map(function(a){
-        var m = motoById(a.motoId);
-        var placa = a.motoPlaca||(m?m.placa:'Moto');
-        var msg = 'Alerta '+labelTipoAlerta(a.tipo)+' — Moto '+placa+(a.descripcion?(': '+a.descripcion):'')+' ('+fmtDate(a.fecha)+')';
-        return '<div class="row-card"><div class="main">'
-          + '<div class="title">'+escapeHtml(placa)+' · '+labelTipoAlerta(a.tipo)+'</div>'
-          + '<div class="meta">'+escapeHtml(a.descripcion||'')+' · '+fmtDate(a.fecha)+'</div></div>'
-          + '<span class="pill bad">Pendiente</span>' + waBtn(msg) + '</div>';
-      }).join('') + '</div>';
-    }
+    cuentasTerceros().forEach(function(c){
+      var rc = monthItems(state.viewMonth, c);
+      html += '<div class="row-card tap" data-go-cuenta="'+escapeHtml(c)+'" style="margin-top:10px;"><div class="main">'
+        + '<div class="title">Cuenta aparte · '+escapeHtml(c)+'</div>'
+        + '<div class="meta">No se suma a RZ · toca para ver su libro</div></div>'
+        + '<div class="amount" style="color:'+(rc.neto>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(rc.neto)+'</div></div>';
+    });
 
-    html += '<div class="section-title">Próximos vencimientos (30 días)</div>';
-    if(vtos.length===0){
-      html += '<div class="empty">No hay vencimientos próximos registrados.</div>';
-    } else {
-      html += '<div class="list">' + vtos.map(function(v){
-        var m = motoById(v.mt.motoId);
-        var placa = v.mt.motoPlaca||(m?m.placa:'Moto');
-        var pill = v.dias<0 ? '<span class="pill bad">Vencido</span>' : (v.dias<=7 ? '<span class="pill warn">'+v.dias+' d</span>' : '<span class="pill ok">'+v.dias+' d</span>');
-        var msg = 'Recordatorio: la moto '+placa+' tiene '+v.mt.tipo+' con vencimiento el '+fmtDate(v.mt.proximoVencimiento)+'.';
-        return '<div class="row-card"><div class="main">'
-          + '<div class="title">'+escapeHtml(placa)+' · '+escapeHtml(v.mt.tipo)+'</div>'
-          + '<div class="meta">Vence '+fmtDate(v.mt.proximoVencimiento)+'</div></div>' + pill + waBtn(msg) + '</div>';
-      }).join('') + '</div>';
-    }
+    html += renderDesglose(state.viewMonth, false, '');
     return html;
   }
   function card(label, value, cls){
@@ -1238,15 +1453,234 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   }
 
   // ---------- FINANZAS ----------
+  // ---------- LIBRO CONTABLE ----------
+  // Todos los ingresos y gastos de una cuenta como una hoja de Excel:
+  // fecha, moto, concepto, entró, salió y saldo acumulado.
+  function libroItems(cuenta, periodo, motoFiltro){
+    var mk = state.viewMonth, yr = state.viewMonth.slice(0,4);
+    function enPeriodo(f){
+      if(!f) return false;
+      if(periodo==='todo') return true;
+      if(periodo==='anio') return f.slice(0,4)===yr;
+      return monthKey(f)===mk;
+    }
+    function enMoto(id){
+      if(!motoFiltro) return true;
+      if(motoFiltro==='__general') return !id;
+      return id===motoFiltro;
+    }
+    var items = [];
+    state.movimientos.forEach(function(m){
+      if(m.tipo!=='ingreso' && m.tipo!=='gasto') return;
+      if(cuentaDeMov(m)!==cuenta || !enPeriodo(m.fecha) || !enMoto(m.motoId||null)) return;
+      var moto = motoById(m.motoId);
+      items.push({ kind:'mov', id:m.id, fecha:m.fecha, createdAt:Number(m.createdAt||0),
+        placa: moto ? moto.placa : (m.motoPlaca || (m.motoId?'Moto eliminada':'General')),
+        concepto: (m.categoria || (m.tipo==='ingreso'?'Ingreso':'Gasto')) + (m.festivo ? ' (festivo)' : ''), detalle: m.nota||'',
+        cat: m.categoria || 'Otro gasto', foto: m.fotoUrl||null, fuente:'Finanzas',
+        ingreso: m.tipo==='ingreso' ? Number(m.monto||0) : 0, gasto: m.tipo==='gasto' ? Number(m.monto||0) : 0 });
+    });
+    state.mantenimientos.forEach(function(mt){
+      var c = Number(mt.costo||0); if(!c) return;
+      if(cuentaDeMant(mt)!==cuenta || !enPeriodo(mt.fecha) || !enMoto(mt.motoId||null)) return;
+      items.push({ kind:'mant', id:mt.id, fecha:mt.fecha, createdAt:Number(mt.createdAt||0),
+        placa: mt.motoPlaca || 'Moto', concepto: 'Mant. · '+(mt.tipo||'Mantenimiento'), detalle: mt.notas||'',
+        cat: 'Mantenimiento', foto: mt.fotoUrl||null, fuente:'Mantenimiento', tipoMant: mt.tipo||'Mantenimiento',
+        ingreso:0, gasto:c });
+    });
+    items.sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||'') || (a.createdAt-b.createdAt); });
+    var saldo = 0, ing = 0, gas = 0;
+    items.forEach(function(it){ ing += it.ingreso; gas += it.gasto; saldo += it.ingreso - it.gasto; it.saldo = saldo; });
+    return { items:items, ingresos:ing, gastos:gas, neto:ing-gas };
+  }
+  // Días sin plata (descanso del conductor o día que no pagó) para mostrarlos
+  // dentro del libro. No suman ni restan: solo informan.
+  function libroDias(cuenta, periodo, motoFiltro){
+    if(motoFiltro==='__general') return [];
+    var mk = state.viewMonth, yr = state.viewMonth.slice(0,4), today = todayISO();
+    function enPeriodo(f){
+      if(periodo==='todo') return true;
+      if(periodo==='anio') return f.slice(0,4)===yr;
+      return monthKey(f)===mk;
+    }
+    var out = [];
+    state.motos.forEach(function(m){
+      if(cuentaDeMoto(m)!==cuenta) return;
+      if(motoFiltro && m.id!==motoFiltro) return;
+      (Array.isArray(m.descansos)?m.descansos:[]).forEach(function(f){
+        if(f<=today && enPeriodo(f)) out.push({ kind:'dia', tipoDia:'descanso', motoId:m.id, fecha:f, placa:m.placa });
+      });
+      if(m.estado==='rentada' && m.fechaInicioRenta){
+        var meses = [], k = monthKey(m.fechaInicioRenta), fin = monthKey(today);
+        while(k<=fin){ meses.push(k); var y=Number(k.slice(0,4)), mo=Number(k.slice(5,7))+1; if(mo>12){mo=1;y++;} k = y+'-'+(mo<10?'0'+mo:mo); }
+        meses.forEach(function(mes){
+          computeMissedDays(m.id, mes).forEach(function(f){
+            if(enPeriodo(f)) out.push({ kind:'dia', tipoDia:'nopago', motoId:m.id, fecha:f, placa:m.placa });
+          });
+        });
+      }
+    });
+    return out;
+  }
+  function libroConDias(items, dias){
+    return items.concat(dias).sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||'') || ((a.createdAt||0)-(b.createdAt||0)); });
+  }
+  function diaPill(it){
+    return it.tipoDia==='descanso' ? '<span class="pill dia-rest">Descanso</span>' : '<span class="pill bad">No pagó</span>';
+  }
+
+  // ---------- HISTORIAL DE GASTOS ----------
+  // Se abre al tocar cualquier valor "Salió" en rojo. Muestra cada gasto con su
+  // moto, tipo, descripción y foto, más el total por tipo de gasto y por moto.
+  function gastosAttr(cuenta, periodo, moto){
+    return ' data-ver-gastos="1" data-g-cuenta="'+escapeHtml(cuenta||'')+'" data-g-periodo="'+(periodo||'mes')+'" data-g-moto="'+escapeHtml(moto||'')+'"';
+  }
+  function openGastos(cuenta, periodo, motoFiltro){
+    cuenta = cuenta||''; periodo = periodo||'mes'; motoFiltro = motoFiltro||'';
+    var r = libroItems(cuenta, periodo, motoFiltro);
+    var gastos = r.items.filter(function(it){ return it.gasto>0; }).reverse(); // más recientes primero
+    var total = gastos.reduce(function(a,it){ return a+it.gasto; },0);
+    var motosCuenta = state.motos.filter(function(m){ return cuentaDeMoto(m)===cuenta; });
+
+    var porTipo = {};
+    gastos.forEach(function(it){ var k = it.kind==='mant' ? 'Mantenimiento: '+it.tipoMant : it.cat; porTipo[k] = porTipo[k] || {n:0,t:0}; porTipo[k].n++; porTipo[k].t += it.gasto; });
+    var tipos = Object.keys(porTipo).sort(function(a,b){ return porTipo[b].t-porTipo[a].t; });
+    var porMoto = {};
+    gastos.forEach(function(it){ porMoto[it.placa] = (porMoto[it.placa]||0) + it.gasto; });
+    var placas = Object.keys(porMoto).sort(function(a,b){ return porMoto[b]-porMoto[a]; });
+
+    var html = '<h2>Historial de gastos</h2>'
+      + (cuentasTerceros().length ? '<div class="owner-only-note">Cuenta: <b>'+escapeHtml(nombreCuenta(cuenta))+'</b></div>' : '')
+      + '<div class="filtros">'
+      + '<select id="gPeriodo" aria-label="Periodo"><option value="mes"'+(periodo==='mes'?' selected':'')+'>'+escapeHtml(new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long', year:'numeric'}))+'</option><option value="anio"'+(periodo==='anio'?' selected':'')+'>Todo el año '+state.viewMonth.slice(0,4)+'</option><option value="todo"'+(periodo==='todo'?' selected':'')+'>Desde el principio</option></select>'
+      + '<select id="gMoto" aria-label="Moto"><option value="">Todas las motos</option>'
+        + motosCuenta.map(function(m){ return '<option value="'+m.id+'"'+(motoFiltro===m.id?' selected':'')+'>'+escapeHtml(m.placa)+'</option>'; }).join('')
+        + '<option value="__general"'+(motoFiltro==='__general'?' selected':'')+'>Gastos generales (sin moto)</option></select>'
+      + '</div>'
+      + '<div class="big-saldo"><div class="label">Total gastado · '+gastos.length+' gasto(s)</div><div class="value neg">'+fmtMoney(total)+'</div></div>';
+
+    if(!gastos.length){
+      html += '<div class="empty"><b>No hay gastos</b>en este periodo.</div>';
+    } else {
+      html += '<div class="section-title">En qué se gastó</div><div class="sheet-wrap"><table class="libro" style="min-width:0;"><thead><tr><th>Tipo de gasto</th><th class="num">Veces</th><th class="num salio">Total</th></tr></thead><tbody>'
+        + tipos.map(function(k){ return '<tr><td>'+escapeHtml(k)+'</td><td class="num">'+porTipo[k].n+'</td><td class="num neg">'+fmtMoney(porTipo[k].t)+'</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+      if(!motoFiltro && placas.length>1){
+        html += '<div class="section-title">Por moto</div><div class="sheet-wrap"><table class="libro" style="min-width:0;"><thead><tr><th>Moto</th><th class="num salio">Total</th></tr></thead><tbody>'
+          + placas.map(function(pl){ return '<tr><td>'+escapeHtml(pl)+'</td><td class="num neg">'+fmtMoney(porMoto[pl])+'</td></tr>'; }).join('')
+          + '</tbody></table></div>';
+      }
+      html += '<div class="section-title">Cada gasto (del más reciente al más antiguo)</div><div class="list">'
+        + gastos.map(function(it){
+            var reg = it.createdAt ? new Date(it.createdAt).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'short',hour:'numeric',minute:'2-digit'}) : '';
+            return '<div class="gasto-item tap" data-g-ficha="'+it.kind+':'+it.id+'" style="cursor:pointer;"><div class="main">'
+              + '<div class="t">'+escapeHtml(it.placa)+' · '+escapeHtml(it.kind==='mant'?('Mantenimiento: '+it.tipoMant):it.cat)+'</div>'
+              + (it.detalle ? '<div class="d">'+escapeHtml(it.detalle)+'</div>' : '')
+              + '<div class="m">'+fmtDate(it.fecha)+' · anotado en '+it.fuente+(reg?(' el '+reg):'')+'</div></div>'
+              + '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><div class="amt">-'+fmtMoney(it.gasto)+'</div>'
+              + (it.foto ? '<button class="pill muted" data-g-foto="'+it.kind+':'+it.id+'" style="cursor:pointer;border:none;">Ver recibo</button>' : '')
+              + '</div></div>';
+          }).join('') + '</div>';
+      html += '<div class="owner-only-note" style="margin-top:8px;">Toca un gasto para ver su ficha completa.</div>';
+    }
+    html += '<div class="sheet-actions" style="margin-top:14px;"><button class="btn ghost" id="cancelSheet">Cerrar</button></div>';
+
+    openSheet(html, function(sheet){
+      sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
+      sheet.querySelector('#gPeriodo').addEventListener('change', function(e){ openGastos(cuenta, e.target.value, motoFiltro); });
+      sheet.querySelector('#gMoto').addEventListener('change', function(e){ openGastos(cuenta, periodo, e.target.value); });
+      sheet.querySelectorAll('[data-g-ficha]').forEach(function(el){
+        el.addEventListener('click', function(){
+          var parts = el.getAttribute('data-g-ficha').split(':');
+          openGastoDetalle(parts[0], parts[1], function(){ openGastos(cuenta, periodo, motoFiltro); });
+        });
+      });
+      sheet.querySelectorAll('[data-g-foto]').forEach(function(b){
+        b.addEventListener('click', function(e){
+          e.stopPropagation();
+          var parts = b.getAttribute('data-g-foto').split(':');
+          var src = parts[0]==='mant' ? state.mantenimientos.find(function(x){return x.id===parts[1];}) : state.movimientos.find(function(x){return x.id===parts[1];});
+          if(src && src.fotoUrl) openImageLightbox(src.fotoUrl);
+        });
+      });
+    });
+  }
+
+  // Ficha de un gasto: qué fue, de qué moto, cuánto y cuándo. Desde aquí se
+  // puede corregir o ver todos los gastos de la misma moto.
+  function openGastoDetalle(kind, id, volver){
+    var esMant = kind==='mant';
+    var src = esMant ? state.mantenimientos.find(function(x){return x.id===id;}) : state.movimientos.find(function(x){return x.id===id;});
+    if(!src) return;
+    var moto = motoById(src.motoId);
+    var placa = moto ? moto.placa : (src.motoPlaca || (src.motoId?'Moto eliminada':'General (sin moto)'));
+    var valor = esMant ? Number(src.costo||0) : Number(src.monto||0);
+    var tipo = esMant ? ('Mantenimiento: '+(src.tipo||'')) : (src.categoria || (src.tipo==='ingreso'?'Ingreso':'Gasto'));
+    var desc = esMant ? (src.notas||'') : (src.nota||'');
+    var reg = src.createdAt ? new Date(Number(src.createdAt)).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'long',year:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+    var esIngreso = !esMant && src.tipo==='ingreso';
+    var html = '<h2>'+(esIngreso?'Detalle del ingreso':'Detalle del gasto')+'</h2>'
+      + '<div class="big-saldo"><div class="label">'+escapeHtml(tipo)+'</div><div class="value '+(esIngreso?'pos':'neg')+'">'+(esIngreso?'+':'-')+fmtMoney(valor)+'</div></div>'
+      + '<div class="stat-list">'
+      + statRow('Moto', escapeHtml(placa))
+      + statRow('Fecha del '+(esIngreso?'ingreso':'gasto'), fmtDate(src.fecha))
+      + (esMant && src.kilometraje ? statRow('Kilometraje', escapeHtml(String(src.kilometraje))+' km') : '')
+      + (esMant && src.proximoVencimiento ? statRow('Próximo vencimiento', fmtDate(src.proximoVencimiento)) : '')
+      + statRow('Anotado en', esMant?'Pestaña Mant.':'Finanzas')
+      + (reg ? statRow('Anotado el', reg) : '')
+      + '</div>'
+      + '<div class="field"><label>Descripción</label><div style="background:var(--surface-2); border-radius:10px; padding:11px 12px; font-size:14px; line-height:1.5;">'+(desc?escapeHtml(desc):'<span style="color:var(--text-muted);">Sin descripción</span>')+'</div></div>'
+      + (src.fotoUrl ? '<div class="sheet-actions"><button class="btn ghost" id="fdFoto">Ver foto del recibo</button></div>' : '')
+      + '<div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">'
+      + ((isOwnerView || esMant) ? '<button class="btn primary" id="fdEditar">Corregir este '+(esIngreso?'ingreso':'gasto')+'</button>' : '')
+      + (!esIngreso ? '<button class="btn ghost" id="fdMoto">Ver todos los gastos de '+escapeHtml(placa)+'</button>' : '')
+      + '<button class="btn ghost" id="fdVolver">'+(volver?'Volver':'Cerrar')+'</button></div>';
+    openSheet(html, function(sheet){
+      sheet.querySelector('#fdVolver').addEventListener('click', function(){ if(volver) volver(); else closeSheet(); });
+      var bf = sheet.querySelector('#fdFoto'); if(bf) bf.addEventListener('click', function(){ openImageLightbox(src.fotoUrl); });
+      var be = sheet.querySelector('#fdEditar'); if(be) be.addEventListener('click', function(){ if(esMant) openMantForm(src); else openMovForm(src); });
+      var bm = sheet.querySelector('#fdMoto'); if(bm) bm.addEventListener('click', function(){
+        var c = esMant ? cuentaDeMant(src) : cuentaDeMov(src);
+        openGastos(c, 'todo', src.motoId || '__general');
+      });
+    });
+  }
+
+  function periodoTexto(periodo){
+    if(periodo==='todo') return 'todo el tiempo';
+    if(periodo==='anio') return 'el año '+state.viewMonth.slice(0,4);
+    return new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long', year:'numeric'});
+  }
+  function descargarLibroCSV(cuenta, periodo, motoFiltro){
+    var r = libroItems(cuenta, periodo, motoFiltro);
+    function q(v){ v = String(v==null?'':v); return /[;"\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+    var lineas = [['Fecha','Moto','Concepto','Detalle','Entró','Salió','Saldo'].join(';')];
+    var _s = 0;
+    libroConDias(r.items, libroDias(cuenta, periodo, motoFiltro)).forEach(function(it){
+      if(it.kind==='dia'){ lineas.push([it.fecha, it.placa, it.tipoDia==='descanso'?'Día de descanso':'Día sin pago', '', '', '', _s].map(q).join(';')); return; }
+      _s = it.saldo; lineas.push([it.fecha, it.placa, it.concepto, it.detalle, it.ingreso||'', it.gasto||'', it.saldo].map(q).join(';'));
+    });
+    lineas.push(['','','TOTAL','',r.ingresos,r.gastos,r.neto].map(q).join(';'));
+    var csv = '﻿' + lineas.join('\r\n');
+    var nombre = 'RZ-libro-'+(cuenta?cuenta.replace(/\W+/g,'')+'-':'')+(periodo==='todo'?'completo':periodo==='anio'?state.viewMonth.slice(0,4):state.viewMonth)+(motoFiltro&&motoFiltro!=='__general'?('-'+((motoById(motoFiltro)||{}).placa||'')):'')+'.csv';
+    try{
+      var blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      showToast('Descargado: '+nombre+'. Ábrelo con Excel o Numbers.');
+    }catch(e){ showToast('No se pudo descargar en este navegador.', true); }
+  }
+
   function renderFinanzas(){
     var terceros = cuentasTerceros();
     if(state.cuenta && terceros.indexOf(state.cuenta)<0) state.cuenta = '';
     var cuenta = state.cuenta || '';
-    var movMes = state.movimientos.filter(function(m){return monthKey(m.fecha)===state.viewMonth && (m.tipo==='ingreso'||m.tipo==='gasto') && cuentaDeMov(m)===cuenta;})
-      .sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
-    var rm = monthItems(state.viewMonth, cuenta);
-    var mantItems = rm.items.filter(function(i){return i.kind==='mant';});
-    var mantTotal = mantItems.reduce(function(a,i){return a+i.monto;},0);
+    var periodo = state.libroPeriodo || 'mes';
+    var motosCuenta = state.motos.filter(function(m){ return cuentaDeMoto(m)===cuenta; });
+    if(state.libroMoto && state.libroMoto!=='__general' && !motosCuenta.some(function(m){return m.id===state.libroMoto;})) state.libroMoto = '';
+    var motoFiltro = state.libroMoto || '';
 
     var html = '';
     if(terceros.length){
@@ -1255,53 +1689,94 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
             return '<button data-cuenta="'+escapeHtml(c)+'" class="'+(c===cuenta?'active':'')+'">'+escapeHtml(nombreCuenta(c))+'</button>';
           }).join('')
         + '</div>';
-      if(cuenta) html += '<div class="banner">Estás viendo la cuenta de <b>'+escapeHtml(cuenta)+'</b>. Su plata y sus gastos van aparte y no se suman a RZ Rentas.</div>';
+      if(cuenta) html += '<div class="banner">Cuenta de <b>'+escapeHtml(cuenta)+'</b>: va aparte y no se suma a RZ Rentas.</div>';
     }
-    html += renderMonthNav();
-    html += '<div class="cards-grid">'
-      + card('Ingresos', fmtMoney(rm.ingresos), 'pos')
-      + card('Gastos (incl. mantenimiento)', fmtMoney(rm.gastos), 'neg')
-      + '<div class="card wide"><div class="label">Saldo del mes</div><div class="value '+(rm.neto>=0?'pos':'neg')+'">'+fmtMoney(rm.neto)+'</div>'
-      + '<div class="sub">'+(cuenta?('Solo motos de '+escapeHtml(cuenta)):'Es la misma cifra de "Rentabilidad del mes" en Resumen')+(mantTotal?(' · incluye '+fmtMoney(mantTotal)+' de la pestaña Mantenimiento'):'')+'</div></div>'
-      + '</div>';
-    if(cuenta){
-      html += '<div class="owner-only-note" style="margin-top:8px;">De cada pago de renta de estas motos se separan '+fmtMoney(DEPOSITO_DIARIO)+' de depósito reembolsable. No se aparta nómina ni se le cobra nada a favor de RZ.</div>';
-      html += '<div class="cards-grid" style="margin-top:10px;">' + card('Depósitos por devolver', fmtMoney(depositosEnCustodia(cuenta)), '') + '</div>';
+    if(periodo!=='todo') html += renderMonthNav();
+
+    html += '<div class="filtros">'
+      + '<select id="libroPeriodo" aria-label="Periodo">'
+        + '<option value="mes"'+(periodo==='mes'?' selected':'')+'>Este mes</option>'
+        + '<option value="anio"'+(periodo==='anio'?' selected':'')+'>Todo el año</option>'
+        + '<option value="todo"'+(periodo==='todo'?' selected':'')+'>Desde el principio</option>'
+      + '</select>'
+      + '<select id="libroMoto" aria-label="Moto">'
+        + '<option value="">Todas las motos</option>'
+        + motosCuenta.map(function(m){ return '<option value="'+m.id+'"'+(motoFiltro===m.id?' selected':'')+'>'+escapeHtml(m.placa)+'</option>'; }).join('')
+        + '<option value="__general"'+(motoFiltro==='__general'?' selected':'')+'>Gastos generales (sin moto)</option>'
+      + '</select></div>';
+
+    var r = libroItems(cuenta, periodo, motoFiltro);
+    var titulo = (motoFiltro==='__general' ? 'Gastos generales' : motoFiltro ? ((motoById(motoFiltro)||{}).placa||'Moto') : 'Todas las motos') + ' · ' + periodoTexto(periodo);
+    html += '<div class="big-saldo"><div class="label">'+escapeHtml(titulo)+'</div>'
+      + '<div class="value '+(r.neto>=0?'pos':'neg')+'">'+fmtMoney(r.neto)+'</div>'
+      + '<div class="line"><span>Entró <b class="pos">'+fmtMoney(r.ingresos)+'</b></span><span>Salió <b class="neg ver-gastos"'+gastosAttr(cuenta, periodo, motoFiltro)+'>'+fmtMoney(r.gastos)+'</b></span></div></div>';
+
+    // Resumen por moto (solo cuando se ven todas)
+    if(!motoFiltro && motosCuenta.length){
+      var gen = libroItems(cuenta, periodo, '__general');
+      html += '<div class="section-title">Resumen por moto</div><div class="sheet-wrap"><table class="libro" style="min-width:0;"><thead><tr><th>Moto</th><th class="num entro">Entró</th><th class="num salio">Salió</th><th class="num">Quedó</th></tr></thead><tbody>'
+        + motosCuenta.map(function(m){
+            var x = libroItems(cuenta, periodo, m.id);
+            return '<tr class="tap" data-libro-moto="'+m.id+'"><td><b>'+escapeHtml(m.placa)+'</b></td><td class="num pos">'+fmtMoney(x.ingresos)+'</td><td class="num neg">'+(x.gastos?'<span class="ver-gastos"'+gastosAttr(cuenta, periodo, m.id)+'>'+fmtMoney(x.gastos)+'</span>':fmtMoney(0))+'</td><td class="num '+(x.neto>=0?'pos':'neg')+'"><b>'+fmtMoney(x.neto)+'</b></td></tr>';
+          }).join('')
+        + (gen.items.length ? '<tr class="tap" data-libro-moto="__general"><td>Gastos generales</td><td class="num pos">'+fmtMoney(gen.ingresos)+'</td><td class="num neg">'+(gen.gastos?'<span class="ver-gastos"'+gastosAttr(cuenta, periodo, '__general')+'>'+fmtMoney(gen.gastos)+'</span>':fmtMoney(0))+'</td><td class="num '+(gen.neto>=0?'pos':'neg')+'">'+fmtMoney(gen.neto)+'</td></tr>' : '')
+        + '<tr class="total"><td>Total</td><td class="num pos">'+fmtMoney(r.ingresos)+'</td><td class="num neg">'+(r.gastos?'<span class="ver-gastos"'+gastosAttr(cuenta, periodo, '')+'>'+fmtMoney(r.gastos)+'</span>':fmtMoney(0))+'</td><td class="num">'+fmtMoney(r.neto)+'</td></tr>'
+        + '</tbody></table></div>'
+        + '<div class="owner-only-note" style="margin-top:-6px;">Toca una moto para ver solo sus movimientos.</div>';
+    }
+
+    // Libro detallado
+    var _d = libroDias(cuenta, periodo, motoFiltro);
+    var _nd = _d.filter(function(x){return x.tipoDia==='descanso';}).length, _np = _d.length-_nd;
+    html += '<div class="section-title"><span>Libro de movimientos ('+r.items.length+')'+(_nd?(' · '+_nd+' descanso'+(_nd>1?'s':'')):'')+(_np?(' · <span style="color:var(--danger)">'+_np+' sin pago</span>'):'')+'</span><button class="pill muted" id="libroCSV" style="cursor:pointer;border:none;">Descargar para Excel</button></div>';
+    if(!r.items.length && !_d.length){
+      html += '<div class="empty"><b>No hay movimientos</b>en '+escapeHtml(periodoTexto(periodo))+'. Registra uno con el botón +.</div>';
     } else {
-      html += '<div class="owner-only-note" style="margin-top:8px;">De cada pago de renta ya se separaron '+fmtMoney(ADMIN_DIARIO)+' para nómina y '+fmtMoney(DEPOSITO_DIARIO)+' de depósito reembolsable, así que no están en "Ingresos". Por eso, cuando pagues la nómina o devuelvas un depósito, no lo registres también como gasto.</div>';
+      var dias = libroDias(cuenta, periodo, motoFiltro);
+      var todos = libroConDias(r.items, dias);
+      html += '<div class="libro-cards">' + todos.slice().reverse().map(function(it){
+            if(it.kind==='dia') return '<div class="lc dia '+it.tipoDia+'" data-dia-moto="'+it.motoId+'|'+it.fecha+'"><div class="main"><div class="t">'+(it.tipoDia==='descanso'?'Día de descanso':'Día sin pago')+'</div><div class="m">'+fmtDate(it.fecha)+' · '+escapeHtml(it.placa)+'</div></div>'+diaPill(it)+'</div>';
+            var esG = !!it.gasto;
+            return '<div class="lc" data-ficha="'+it.kind+':'+it.id+'"><div class="main"><div class="t">'+escapeHtml(it.concepto)+'</div>'
+              + '<div class="m">'+fmtDate(it.fecha)+(it.placa?(' · '+escapeHtml(it.placa)):'')+(it.foto?' · 📎 recibo':'')+'</div>'
+              + (it.detalle?'<div class="d">'+escapeHtml(it.detalle)+'</div>':'')+'</div>'
+              + '<div class="amt '+(esG?'neg':'pos')+'">'+(esG?'−'+fmtMoney(it.gasto):'+'+fmtMoney(it.ingreso))+'</div>'
+              + (isOwnerView && it.kind==='mov' ? '<button class="del" data-del-mov="'+it.id+'" aria-label="Eliminar" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>' : '')
+              + '</div>';
+          }).join('')
+        + '<div class="lc-total"><span>Entró <span class="pos">'+fmtMoney(r.ingresos)+'</span></span><span>Salió <span class="neg">'+fmtMoney(r.gastos)+'</span></span><span>Quedó '+fmtMoney(r.neto)+'</span></div></div>';
+      html += '<div class="sheet-wrap libro-tabla"><table class="libro" style="min-width:440px;"><thead><tr><th>Fecha</th><th>Moto</th><th>Concepto</th><th class="num entro">Entró</th><th class="num salio">Salió</th>'+(isOwnerView?'<th></th>':'')+'</tr></thead><tbody>'
+        + todos.map(function(it){
+            var fc = (it.fecha||'').split('-'); var fCorta = fc.length===3 ? (fc[2]+'/'+fc[1]+(periodo==='mes'?'':'/'+fc[0].slice(2))) : '';
+            if(it.kind==='dia') return '<tr class="tap dia '+it.tipoDia+'" data-dia-moto="'+it.motoId+'|'+it.fecha+'"><td style="white-space:nowrap;">'+fCorta+'</td><td>'+escapeHtml(it.placa)+'</td><td>'+diaPill(it)+'</td><td class="num">—</td><td class="num">—</td>'+(isOwnerView?'<td></td>':'')+'</tr>';
+            var tapAttr = ' class="tap" data-ficha="'+it.kind+':'+it.id+'"';
+            return '<tr'+tapAttr+'><td style="white-space:nowrap;">'+fCorta+'</td><td>'+escapeHtml(it.placa)+'</td>'
+              + '<td>'+escapeHtml(it.concepto)+(it.detalle?'<span class="sub">'+escapeHtml(it.detalle)+'</span>':'')+'</td>'
+              + '<td class="num pos">'+(it.ingreso?fmtMoney(it.ingreso):'')+'</td><td class="num neg">'+(it.gasto?'<b>'+fmtMoney(it.gasto)+'</b>':'')+'</td>'
+              + (isOwnerView ? '<td>'+(it.kind==='mov' ? '<button class="del" data-del-mov="'+it.id+'" aria-label="Eliminar" style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>' : '')+'</td>' : '')
+              + '</tr>';
+          }).join('')
+        + '<tr class="total"><td colspan="3">Total · quedó '+fmtMoney(r.neto)+'</td><td class="num pos">'+fmtMoney(r.ingresos)+'</td><td class="num neg">'+fmtMoney(r.gastos)+'</td>'+(isOwnerView?'<td></td>':'')+'</tr>'
+        + '</tbody></table></div>';
+      html += '<div class="owner-only-note" style="margin-top:-6px;">Toca un movimiento para ver su ficha completa (qué fue, de qué moto, descripción y recibo). Los días de descanso y los días sin pago aparecen en el libro pero no suman ni restan. La nómina y el depósito no aparecen aquí porque se apartan antes. El archivo para Excel incluye además el saldo acumulado.</div>';
     }
-    if(isOwnerView && !cuenta){
-      html += '<div class="cards-grid" style="margin-top:10px;">' + card('Nómina/administración acumulada', fmtMoney(nominaAcumulada()), 'pos')
-        + card('Depósitos por devolver', fmtMoney(depositosEnCustodia('')), '') + '</div>';
-      html += '<div class="owner-only-note" style="margin-top:6px;">"Depósitos por devolver" es la plata de los arrendatarios que tienes guardada (suma de todas las motos). No es ingreso tuyo hasta que se retenga algo al liquidar.</div>';
-      html += '<div class="sheet-actions" style="margin-top:-4px; margin-bottom:10px;"><button class="btn ghost" id="reiniciarNomina">Ya pagué la nómina — reiniciar a $0</button></div>';
-    }
+
+    // Gastos fijos y saldos apartados
     html += renderRecurrentes(state.viewMonth, cuenta);
-    html += '<div class="section-title">Movimientos de '+new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'})+'</div>';
-    if(mantItems.length>0){
-      html += '<div class="owner-only-note" style="margin:-4px 0 8px;">Los registros marcados "Mantenimiento" vienen de esa pestaña; se editan o borran allá.</div>';
+    var dep = depositosEnCustodia(cuenta);
+    html += '<div class="section-title">Plata apartada (no es ganancia)</div><div class="stat-list">'
+      + (isOwnerView && !cuenta ? statRow('Nómina acumulada', fmtMoney(nominaAcumulada())) : '')
+      + statRow('Depósitos por devolver', fmtMoney(dep))
+      + '</div>';
+    if(isOwnerView && !cuenta){
+      html += '<div class="sheet-actions" style="margin-top:-4px; margin-bottom:10px;"><button class="btn ghost" id="reiniciarNomina">Ya pagué la nómina: reiniciar a $0</button></div>';
     }
-    if(movMes.length===0 && mantItems.length===0){
-      html += '<div class="empty"><b>Sin movimientos en este mes</b>'+(state.viewMonth===currentMonth?'Registra tu primer ingreso o gasto con el botón +.':'No se registró actividad en este mes.')+'</div>';
-    } else {
-      html += '<div class="list">' + movMes.map(function(m){
-        var moto = motoById(m.motoId);
-        var flagged = isOwnerView && supervisionDoc(m.id);
-        return '<div class="row-card"><div class="main">'
-          + '<div class="title">'+escapeHtml(m.categoria||(m.tipo==='ingreso'?'Ingreso':'Gasto'))+'</div>'
-          + '<div class="meta">'+fmtDate(m.fecha)+' · '+(moto?escapeHtml(moto.placa):'General')+(m.nota?(' · '+escapeHtml(m.nota)):'')+'</div></div>'
-          + '<div class="amount '+(m.tipo==='ingreso'?'pos':'neg')+'">'+(m.tipo==='ingreso'?'+':'-')+fmtMoney(m.monto)+'</div>'
-          + (m.fotoUrl ? '<button class="del photo-badge" data-view-photo-mov="'+m.id+'" aria-label="Ver foto del recibo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></button>' : '')
-          + (isOwnerView ? '<button class="flag'+(flagged?' on':'')+'" data-flag-mov="'+m.id+'" data-flag-placa="'+escapeHtml(moto?moto.placa:'General')+'" aria-label="Marcar sospechoso"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18M5 4h11l-2 4 2 4H5"/></svg></button>' : '')
-          + (isOwnerView ? '<button class="del" data-edit-mov="'+m.id+'" aria-label="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' : '')
-          + (isOwnerView ? '<button class="del" data-del-mov="'+m.id+'" aria-label="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h10l1-13"/></svg></button>' : '')
-          + '</div>';
-      }).join('') + mantItems.map(function(it){
-        return '<div class="row-card tap" data-open-mant="'+it.id+'"><div class="main">'
-          + '<div class="title">'+escapeHtml(it.titulo)+'<span class="dg-src">Mantenimiento</span></div>'
-          + '<div class="meta">'+fmtDate(it.fecha)+' · '+(it.placa?escapeHtml(it.placa):'General')+(it.nota?(' · '+escapeHtml(it.nota)):'')+'</div></div>'
-          + '<div class="amount neg">-'+fmtMoney(it.monto)+'</div></div>';
-      }).join('') + '</div>';
+    if(isOwnerView){
+      var ur = ultimoRespaldo();
+      html += '<div class="section-title">Seguridad de los datos</div>'
+        + '<div class="owner-only-note">'+(ur ? ('Último respaldo en este aparato: '+new Date(ur).toLocaleDateString('es-CO',{day:'numeric',month:'long'})) : 'Todavía no has descargado un respaldo en este aparato.')+' Descárgalo cada semana y guárdalo en iCloud o Drive.</div>'
+        + '<div class="sheet-actions" style="margin-bottom:10px;"><button class="btn ghost" id="btnRespaldo">Descargar respaldo completo</button>'
+        + '<button class="btn ghost" id="btnPapelera">Papelera ('+((state.papelera||[]).length)+')</button></div>';
     }
     return html;
   }
@@ -1490,7 +1965,6 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
       if(state.tab==='finanzas') openMovForm();
       else if(state.tab==='motos') openMotoForm();
       else if(state.tab==='mantenimiento') openMantForm();
-      else if(state.tab==='gps') openAlertaForm();
     });
     document.getElementById('app').appendChild(b);
   }
@@ -1827,6 +2301,24 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     var recentMovs = st.movs.filter(function(mv){ return mv.tipo==='ingreso' || mv.tipo==='gasto'; }).sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');}).slice(0,10);
     var html = '<h2>'+escapeHtml(motoLabel(m))+'</h2>';
     if(cuentaDeMoto(m)) html += '<div class="banner">Moto de <b>'+escapeHtml(cuentaDeMoto(m))+'</b> · cuenta aparte. Sus pagos y gastos no se suman a RZ Rentas y no aparta nómina.</div>';
+    var depTop = depositoMoto(m.id);
+    html += '<div class="big-saldo"><div class="label">Depósito acumulado de esta moto</div>'
+      + '<div class="value">'+fmtMoney(depTop.total)+'</div>'
+      + '<div class="line"><span>'+depTop.dias+' día(s) pagado(s) × '+fmtMoney(DEPOSITO_DIARIO)+'</span>'+(m.arrendatarioNombre?('<span>Arrendatario: <b>'+escapeHtml(m.arrendatarioNombre)+'</b></span>'):'')+'</div>';
+    var cuentaM = cuentaDeMoto(m);
+    var mesM = libroItems(cuentaM, 'mes', m.id);
+    var nomM = state.movimientos.filter(function(mv){ return mv.tipo==='nomina' && mv.motoId===m.id && monthKey(mv.fecha||'')===state.viewMonth; })
+      .reduce(function(a,mv){ return a+Number(mv.monto||0); }, 0);
+    var nomMes = new Date(state.viewMonth+'-02').toLocaleDateString('es-CO',{month:'long'});
+    html += '<div class="mini-grid">'
+      + '<div><div class="k">Ganancia de '+nomMes+'</div><div class="v '+(mesM.neto>=0?'pos':'neg')+'">'+fmtMoney(mesM.neto)+'</div></div>'
+      + '<div><div class="k">Entró en '+nomMes+'</div><div class="v pos">'+fmtMoney(mesM.ingresos)+'</div></div>'
+      + '<div><div class="k">Gastos de '+nomMes+'</div><div class="v neg"><span class="ver-gastos"'+gastosAttr(cuentaM, 'mes', m.id)+'>'+fmtMoney(mesM.gastos)+'</span></div></div>'
+      + '<div><div class="k">Pago administración</div><div class="v">'+(cuentaM ? '<span style="font-size:14px;font-family:inherit;color:var(--text-muted)">No aplica</span>' : fmtMoney(nomM))+'</div></div>'
+      + '</div></div>';
+    html += '<div class="sheet-actions" style="margin-bottom:6px;"><button class="btn primary" id="quickRenta">+ Renta de hoy'+(esFestivo(todayISO())?(' · festivo '+fmtMoney(TARIFA_FESTIVO)):'')+'</button></div>';
+    html += '<div id="calWrap">'+renderMotoCalendar(motoId)+'</div>';
+    html += '<div class="section-title" style="margin-top:18px;">Números de esta moto</div>';
     html += '<div class="stat-list">'
       + statRow('Valor de compra', fmtMoney(st.compra))
       + statRow('Total recibido en renta', fmtMoney(st.ingresos), 'pos')
@@ -1838,11 +2330,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     var liqs = liquidacionesMoto(motoId);
     var sinDep = isOwnerView ? diasSinDeposito(m) : [];
     html += '<div class="section-title" style="margin-top:18px;">Depósito reembolsable</div>';
-    html += '<div class="stat-list">'
-      + statRowTotal('Acumulado en esta renta', fmtMoney(dp.total), 'pos')
-      + statRow('Días pagados que suman depósito', dp.dias+' día(s) × '+fmtMoney(DEPOSITO_DIARIO))
-      + '</div>';
-    html += '<div class="owner-only-note" style="margin-top:-6px;">Se devuelve al terminar la renta. Cuando pases la moto a "Disponible", la app te pide cuánto devolver y el acumulado vuelve a $0.</div>';
+    html += '<div class="owner-only-note">El valor acumulado está arriba. Se devuelve al terminar la renta. Cuando pases la moto a "Disponible", la app te pide cuánto devolver y el acumulado vuelve a $0.</div>';
     if(sinDep.length){
       html += '<div class="warn-box"><b>'+sinDep.length+' día(s) de esta renta no tienen depósito</b>Se registraron antes de este cambio. <button class="pill muted" id="ajusteDep" style="cursor:pointer;border:none;margin-top:6px;">Pasar '+fmtMoney(sinDep.length*DEPOSITO_DIARIO)+' al depósito</button></div>';
     }
@@ -1866,11 +2354,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
         html += '<div class="sheet-actions" style="margin-top:6px;"><a class="btn primary" href="'+arrWa+'" target="_blank" rel="noopener" style="text-decoration:none; text-align:center;">Escribirle por WhatsApp</a></div>';
       }
     }
-    html += '<div class="sheet-actions">'
-      + '<button class="btn ghost" id="editMotoBtn">Editar moto</button>'
-      + '<button class="btn primary" id="quickRenta">+ Renta de hoy</button>'
-      + '</div>';
-    html += '<div id="calWrap">'+renderMotoCalendar(motoId)+'</div>';
+    html += '<div class="sheet-actions" style="margin-top:8px;"><button class="btn ghost" id="editMotoBtn">Editar moto</button><button class="btn ghost" id="verLibroMoto">Ver sus cuentas</button></div>';
     html += '<div class="section-title" style="margin-top:20px;">Últimos movimientos de esta moto</div>';
     if(recentMovs.length===0){
       html += '<div class="empty">Sin movimientos registrados aún para esta moto.</div>';
@@ -1887,8 +2371,18 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     openSheet(html, function(sheet){
       sheet.querySelector('#cancelSheet').addEventListener('click', closeSheet);
       sheet.querySelector('#editMotoBtn').addEventListener('click', function(){ openMotoForm(m); });
+      sheet.querySelectorAll('[data-ver-gastos]').forEach(function(el){
+        el.addEventListener('click', function(e){ e.stopPropagation(); openGastos(el.getAttribute('data-g-cuenta'), el.getAttribute('data-g-periodo'), el.getAttribute('data-g-moto')); });
+      });
+      sheet.querySelector('#verLibroMoto').addEventListener('click', function(){
+        closeSheet();
+        state.cuenta = cuentaDeMoto(m); state.libroMoto = m.id; state.libroPeriodo = 'mes';
+        state.tab = 'finanzas';
+        document.querySelectorAll('#tabbar button').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')==='finanzas'); });
+        render(); window.scrollTo(0,0);
+      });
       sheet.querySelector('#quickRenta').addEventListener('click', function(){
-        registrarPagoRenta(m, todayISO(), '', closeSheet);
+        registrarPagoRenta(m, todayISO(), '', function(){ closeSheet(); if(esFestivo(todayISO())) showToast('Renta festiva registrada: '+fmtMoney(TARIFA_FESTIVO)+' (sin depósito).'); });
       });
       wireCalendar(sheet, m);
       var aj = sheet.querySelector('#ajusteDep');
@@ -1908,17 +2402,53 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
         wireCalendar(sheet, m);
       });
     });
-    wrap.querySelectorAll('[data-cal-pay]').forEach(function(cell){
+    wrap.querySelectorAll('[data-cal-dia]').forEach(function(cell){
       cell.addEventListener('click', function(){
-        var iso = cell.getAttribute('data-cal-pay');
-        askConfirm('Registrar pago atrasado',
-          '¿Registrar la renta de <b>'+escapeHtml(m.placa)+'</b> del '+fmtDate(iso)+' por <b>'+fmtMoney(m.tarifaDiaria)+'</b>?',
-          'Registrar pago', function(){
-            registrarPagoRenta(m, iso, 'Pago atrasado registrado desde el calendario', function(){
-              showToast('Pago del '+fmtDate(iso)+' registrado.');
-              openMotoDetail(m.id, true);
+        var iso = cell.getAttribute('data-cal-dia');
+        var mm = motoById(m.id) || m;
+        var yaDescanso = esDescanso(mm, iso);
+        var hoy = todayISO();
+        var fest = nombreFestivo(iso);
+        var yaPagado = state.movimientos.some(function(mv){ return mv.motoId===mm.id && mv.tipo==='ingreso' && mv.categoria==='Renta' && mv.fecha===iso; });
+        var esAdminMoto = !!cuentaDeMoto(mm);
+        var volver = function(){ openMotoDetail(m.id, true); };
+        openSheet(
+          '<h2>'+escapeHtml(mm.placa)+' · '+fmtDate(iso)+'</h2>'
+          + (fest ? '<div class="warn-box" style="border-color:#a78bfa;"><b>Día festivo · '+escapeHtml(fest)+'</b>La renta de hoy vale '+fmtMoney(TARIFA_FESTIVO)
+              + (esAdminMoto ? ' y va completa a la cuenta de '+escapeHtml(cuentaDeMoto(mm))+'.' : ': '+fmtMoney(TARIFA_FESTIVO-ADMIN_FESTIVO)+' para RZ y '+fmtMoney(ADMIN_FESTIVO)+' para el administrador.')
+              + ' No se aparta depósito.</div>' : '')
+          + (yaPagado ? '<div class="owner-only-note">Este día ya tiene la renta registrada.</div>' : '<div class="owner-only-note">'+(yaDescanso
+              ? 'Este día está marcado como <b>descanso del conductor</b>: no cuenta como día sin pago.'
+              : (iso<=hoy ? 'Este día no tiene pago registrado. ¿Qué pasó?' : 'Puedes dejar marcado desde ya un día de descanso.'))+'</div>')
+          + '<div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">'
+          + (yaPagado ? '' : yaDescanso
+              ? '<button class="btn primary" id="dQuitar">Quitar descanso</button>'
+              : (iso<=hoy ? '<button class="btn primary" id="dPagar">Registrar pago de '+fmtMoney(tarifaDelDia(mm, iso))+(fest?' (festivo)':'')+'</button>' : '')
+                + '<button class="btn '+(iso<=hoy?'ghost':'primary')+'" id="dMarcar">Fue día de descanso</button>')
+          + (fest ? '<button class="btn ghost" id="dNoFest">Este día NO es festivo</button>' : '<button class="btn ghost" id="dSiFest">Marcar como día festivo</button>')
+          + '<button class="btn ghost" id="dVolver">Volver</button></div>',
+          function(sheet){
+            sheet.querySelector('#dVolver').addEventListener('click', volver);
+            var bsf = sheet.querySelector('#dSiFest');
+            if(bsf) bsf.addEventListener('click', function(){ marcarFestivo(iso, true, function(){ showToast(fmtDate(iso)+' marcado como festivo.'); volver(); }); });
+            var bnf = sheet.querySelector('#dNoFest');
+            if(bnf) bnf.addEventListener('click', function(){ marcarFestivo(iso, false, function(){ showToast(fmtDate(iso)+' ya no cuenta como festivo.'); volver(); }); });
+            var bm = sheet.querySelector('#dMarcar');
+            if(bm) bm.addEventListener('click', function(){
+              guardarDescanso(mm, iso, true, function(){ showToast(fmtDate(iso)+' marcado como descanso.'); volver(); });
             });
-          }, function(){ openMotoDetail(m.id, true); });
+            var bq = sheet.querySelector('#dQuitar');
+            if(bq) bq.addEventListener('click', function(){
+              guardarDescanso(mm, iso, false, function(){ showToast('Se quitó el descanso del '+fmtDate(iso)+'.'); volver(); });
+            });
+            var bp = sheet.querySelector('#dPagar');
+            if(bp) bp.addEventListener('click', function(){
+              registrarPagoRenta(mm, iso, 'Pago atrasado registrado desde el calendario', function(){
+                showToast('Pago del '+fmtDate(iso)+' registrado'+(fest?(' como festivo ('+fmtMoney(TARIFA_FESTIVO)+', sin depósito)'):'')+'.'); setTimeout(volver, 350);
+              });
+            });
+          }
+        );
       });
     });
     wrap.querySelectorAll('[data-cal-info]').forEach(function(cell){
@@ -1971,7 +2501,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
         if(cancelBtn) cancelBtn.addEventListener('click', closeSheet);
         var delBtn = sheet.querySelector('#delMantDetail');
         if(delBtn) delBtn.addEventListener('click', function(){
-          db.doc(negocioPath('mantenimientos')+'/'+existing.id).delete().then(closeSheet).catch(showSaveError);
+          borrarConPapelera([{col:'mantenimientos', id:existing.id, data:existing}], escapeHtml(existing.motoPlaca||'')+' '+escapeHtml(existing.tipo||'')+' '+fmtMoney(existing.costo||0)+' del '+fmtDate(existing.fecha)).then(closeSheet).catch(showSaveError);
         });
         sheet.querySelector('#saveMant').addEventListener('click', function(){
           var motoId = document.getElementById('tMoto').value;
@@ -2054,6 +2584,9 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
 
   // ---------- events ----------
   function wireView(){
+    var bResp = document.getElementById('btnRespaldo'); if(bResp) bResp.addEventListener('click', descargarRespaldo);
+    var bPap = document.getElementById('btnPapelera'); if(bPap) bPap.addEventListener('click', openPapelera);
+    var bResp2 = document.getElementById('goRespaldo'); if(bResp2) bResp2.addEventListener('click', descargarRespaldo);
     var reiniciarNominaBtn = document.getElementById('reiniciarNomina');
     if(reiniciarNominaBtn){
       reiniciarNominaBtn.addEventListener('click', function(){
@@ -2069,7 +2602,8 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
       });
     }
     document.querySelectorAll('[data-del-mov]').forEach(function(b){
-      b.addEventListener('click', function(){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
         if(!isOwnerView) return;
         var id = b.getAttribute('data-del-mov');
         var mov = state.movimientos.find(function(m){return m.id===id;});
@@ -2077,16 +2611,16 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
         // Si es una renta, también se borra su parte de nómina (se crearon juntas).
         // Antes quedaba "huérfana" y la nómina acumulada mostraba de más.
         var parejas = (mov.tipo==='ingreso' && mov.categoria==='Renta') ? state.movimientos.filter(function(m){
-          return (m.tipo==='nomina' || m.tipo==='deposito') && m.motoId===mov.motoId && m.fecha===mov.fecha && m.createdAt===mov.createdAt;
+          if(m.tipo!=='nomina' && m.tipo!=='deposito') return false;
+          if(mov.rentaId) return m.rentaId===mov.rentaId;
+          return m.motoId===mov.motoId && m.fecha===mov.fecha && m.createdAt===mov.createdAt;
         }) : [];
         var extraTxt = parejas.map(function(pm){ return fmtMoney(pm.monto)+' de '+(pm.tipo==='nomina'?'nómina':'depósito'); }).join(' y ');
         askConfirm('Eliminar movimiento',
           escapeHtml(mov.categoria||'Movimiento')+' de <b>'+fmtMoney(mov.monto)+'</b> del '+fmtDate(mov.fecha)+'.'+(parejas.length?(' También se borran los '+extraTxt+' de esa renta.'):''),
           'Eliminar', function(){
-            var batch = db.batch();
-            batch.delete(db.doc(negocioPath('movimientos')+'/'+id));
-            parejas.forEach(function(pm){ batch.delete(db.doc(negocioPath('movimientos')+'/'+pm.id)); });
-            batch.commit().catch(showSaveError);
+            var items = [{col:'movimientos', id:id, data:mov}].concat(parejas.map(function(pm){ return {col:'movimientos', id:pm.id, data:pm}; }));
+            borrarConPapelera(items, escapeHtml(mov.motoPlaca||'')+' '+escapeHtml(mov.categoria||'')+' '+fmtMoney(mov.monto)+' del '+fmtDate(mov.fecha)).catch(showSaveError);
           });
       });
     });
@@ -2123,7 +2657,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
             var p = Promise.resolve();
             tandas.forEach(function(t){ p = p.then(function(){ var bt = db.batch(); t.forEach(function(r){ bt.update(r, { cuenta: c }); }); return bt.commit(); }); });
             p.then(function(){ return recs.length!==state.recurrentes.length ? db.doc(negocioPath('config')+'/recurrentes').set({ items: recs, updatedAt: Date.now() }) : null; })
-             .then(function(){ return db.doc(negocioPath('motos')+'/'+id).delete(); })
+             .then(function(){ return borrarConPapelera([{col:'motos', id:id, data:m}], escapeHtml(m.placa||'')); })
              .then(function(){ showToast('Moto '+m.placa+' eliminada. Su historia sigue en la cuenta de '+nombreCuenta(c)+'.'); })
              .catch(showSaveError);
           });
@@ -2145,7 +2679,7 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
         var mt = state.mantenimientos.find(function(x){return x.id===id;});
         askConfirm('Eliminar mantenimiento',
           (mt?(escapeHtml(mt.motoPlaca||'')+' · '+escapeHtml(mt.tipo||'')+(mt.costo?(' de <b>'+fmtMoney(mt.costo)+'</b>'):'')+' del '+fmtDate(mt.fecha)+'.'):'¿Eliminar este registro?'),
-          'Eliminar', function(){ db.doc(negocioPath('mantenimientos')+'/'+id).delete().catch(showSaveError); });
+          'Eliminar', function(){ if(!mt) return; borrarConPapelera([{col:'mantenimientos', id:id, data:mt}], escapeHtml(mt.motoPlaca||'')+' '+escapeHtml(mt.tipo||'')+' '+fmtMoney(mt.costo||0)+' del '+fmtDate(mt.fecha)).catch(showSaveError); });
       });
     });
     document.querySelectorAll('[data-del-alerta]').forEach(function(b){
@@ -2203,12 +2737,39 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     });
     document.querySelectorAll('[data-go-cuenta]').forEach(function(b){
       b.addEventListener('click', function(){
-        state.cuenta = b.getAttribute('data-go-cuenta');
+        state.cuenta = b.getAttribute('data-go-cuenta'); state.libroMoto = '';
         state.tab = 'finanzas';
         document.querySelectorAll('#tabbar button').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')==='finanzas'); });
         render();
       });
     });
+    document.querySelectorAll('[data-ficha]').forEach(function(row){
+      row.addEventListener('click', function(){
+        var parts = row.getAttribute('data-ficha').split(':');
+        openGastoDetalle(parts[0], parts[1]);
+      });
+    });
+    document.querySelectorAll('[data-dia-moto]').forEach(function(row){
+      row.addEventListener('click', function(){
+        var pr = row.getAttribute('data-dia-moto').split('|');
+        calMonth = monthKey(pr[1]); openMotoDetail(pr[0], true);
+      });
+    });
+    document.querySelectorAll('[data-ver-gastos]').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        openGastos(el.getAttribute('data-g-cuenta'), el.getAttribute('data-g-periodo'), el.getAttribute('data-g-moto'));
+      });
+    });
+    var selP = document.getElementById('libroPeriodo');
+    if(selP) selP.addEventListener('change', function(){ state.libroPeriodo = selP.value; render(); });
+    var selM = document.getElementById('libroMoto');
+    if(selM) selM.addEventListener('change', function(){ state.libroMoto = selM.value; render(); });
+    document.querySelectorAll('[data-libro-moto]').forEach(function(row){
+      row.addEventListener('click', function(){ state.libroMoto = row.getAttribute('data-libro-moto'); render(); window.scrollTo(0,0); });
+    });
+    var csvBtn = document.getElementById('libroCSV');
+    if(csvBtn) csvBtn.addEventListener('click', function(){ descargarLibroCSV(state.cuenta||'', state.libroPeriodo||'mes', state.libroMoto||''); });
     var goRec = document.getElementById('goRecurrentes');
     if(goRec) goRec.addEventListener('click', function(){
       state.cuenta = '';
@@ -2251,17 +2812,13 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
     subscribe('motos','motos');
     subscribe('movimientos','movimientos');
     subscribe('mantenimientos','mantenimientos');
-    subscribe('alertas','alertas');
+    // Las pestañas GPS y Supervisión se quitaron (nov 2026) para simplificar la app.
+    // Sus datos guardados no se borran; solo ya no se muestran.
     subscribeNominaConfig();
     subscribeRecurrentes();
-    if(isOwnerView) subscribe('supervision','supervision');
-    var existingSupBtn = document.querySelector('#tabbar button[data-tab="supervision"]');
-    if(isOwnerView && !existingSupBtn){
-      var tpl = document.getElementById('tplSupervisionTab');
-      if(tpl) document.getElementById('tabbar').appendChild(tpl.content.cloneNode(true));
-    }
-    if(!isOwnerView && existingSupBtn) existingSupBtn.remove();
-    document.getElementById('tabbar').style.gridTemplateColumns = isOwnerView ? 'repeat(6,1fr)' : '';
+    subscribeFestivos();
+    subscribePapelera();
+    if(state.tab==='gps' || state.tab==='supervision') state.tab = 'resumen';
     render();
   }
 
@@ -2281,6 +2838,9 @@ main{flex:1; padding:16px; padding-bottom:96px; max-width:640px; margin:0 auto; 
   // real y es la que tú defines al crear cada cuenta desde la consola de Firebase.
   var auth = firebase.auth();
   db = firebase.firestore();
+  // Guarda en el celular lo que se registra sin señal y lo sube cuando vuelve
+  // la conexión, aunque se cierre la app. Si el navegador no lo permite, sigue igual.
+  try{ if(db.enablePersistence) db.enablePersistence({ synchronizeTabs: true }).catch(function(e){ console.warn('sin modo offline:', e && e.code); }); }catch(e){}
 
   function emailFor(negocio, rol){
     return negocio.trim().toLowerCase().replace(/[^a-z0-9]/g,'') + '.' + rol + '@rzcontrol.app';
